@@ -11,6 +11,66 @@ body {
   font-weight: normal;
   font-style: normal;
 }
+
+/* login */
+
+.login {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.login .form {
+  width: calc(100vw - 40px);
+  padding: 20px;
+}
+
+.login .form input {
+  background: transparent;
+  border-color: #7a0000;
+}
+
+.login .form label {
+  color: #7a0000;
+}
+
+.login .form input::placeholder {
+  /* color: #fcfcfcbb; */
+  font-size: 16px;
+}
+
+.login .form button {
+  background: transparent;
+}
+
+@media screen and (min-width: 413px) {
+  .login .form {
+    width: 300px;
+    margin: auto;
+    margin-top: 10px;
+  }
+}
+
+.login .logo {
+  height: 200px;
+}
+
+.login .logo .st0 {
+  fill: #870000;
+}
+.login .logo .st1 {
+  fill: #7a0000;
+}
+.login .logo .st2 {
+  fill: #a7a9ac;
+}
+.login .logo .st3 {
+  fill: #ffffff;
+}
+
 /* header style */
 .header {
   position: fixed;
@@ -354,5 +414,5 @@ label {
 
 table tbody tr:nth-child(2n + 1) td:first-child,
 table tbody tr:nth-child(2n + 1) td {
-  background: #87000018;
+  background: #f1e4e4;
 }
