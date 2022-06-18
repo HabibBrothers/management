@@ -286,3 +286,73 @@ label {
   color: #fcfcfc;
   background-color: #870000;
 }
+
+/* table */
+.table {
+  margin: 20px;
+  padding: 20px;
+  border-radius: 6px;
+  box-shadow: rgba(0, 0, 0, 0.05) 0px 0px 0px 1px,
+    rgb(209, 213, 219) 0px 0px 0px 1px inset;
+  background-color: #fcfcfc;
+  display: flex;
+  flex-direction: column;
+  /* height: calc(100vh - 212px); */
+  margin-bottom: 20px;
+  font-family: "SolaimanLipi", monospace;
+}
+
+.table h1 {
+  margin: 0;
+  text-align: left;
+  padding-bottom: 10px;
+  font-size: 25px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #edecfb;
+}
+
+.table .wrapper {
+  overflow: auto;
+  height: calc(100vh - 246px);
+}
+
+.table table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.table table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: 0.625rem 0.25rem;
+  width: 5.25rem;
+  background-color: #fcfcfc;
+}
+
+.table table thead th:first-child {
+  left: 0;
+  z-index: 3;
+  position: sticky;
+  width: 3rem;
+}
+
+.table table tbody td:first-child {
+  left: 0;
+  z-index: 2;
+  position: sticky;
+  width: 3rem;
+  background-color: #fcfcfc;
+}
+
+.table table tbody td {
+  padding: 0.625rem 0.25rem;
+  color: #3a3a50;
+  text-align: center;
+}
+
+table tbody tr:nth-child(2n + 1) td:first-child,
+table tbody tr:nth-child(2n + 1) td {
+  background: #87000018;
+}
