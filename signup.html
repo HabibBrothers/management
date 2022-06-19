@@ -7,20 +7,12 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, user-scalable=0"
     />
+    <link rel="shortcut icon" href="./logo196.png" type="image/png">
     <title>Habib Brother's</title>
     <link rel="stylesheet" href="./assets/css/app.css" />
   </head>
   <body>
     <div id="root"></div>
-    <script type="module">
-      import d from "./assets/js/NTechDOM.js";
-      import { cement } from "./modules/cement.js";
-
-      d.render("root", cement);
-
-      window.closeDiv = (q) => {
-        document.querySelector(q).style.display = "none";
-      };
-    </script>
+    <script type="module" src="./modules/signup.js"></script>
   </body>
 </html>

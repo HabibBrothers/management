@@ -1,6 +1,8 @@
 import d from "../assets/js/NTechDOM.js";
 
-const footer = d.createElement("div").setAttribute({ class: "footer" });
+const footer = d
+  .createElement("div")
+  .setAttribute({ class: "footer" });
 
 const home = d.createElement(
   "div",

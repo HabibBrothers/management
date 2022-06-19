@@ -21,6 +21,7 @@ body {
   align-items: center;
   justify-content: center;
   flex-direction: column;
+  font-family: monospace !important;
 }
 
 .login .form {
@@ -31,6 +32,7 @@ body {
 .login .form input {
   background: transparent;
   border-color: #7a0000;
+  font-family: monospace !important;
 }
 
 .login .form label {
@@ -44,6 +46,28 @@ body {
 
 .login .form button {
   background: transparent;
+}
+
+.login .error,
+.login .success {
+  margin-top: 20px;
+  font-size: 13px;
+  background-image: linear-gradient(#ffebe9, #ffebe9);
+  border: 1px solid #ff818266;
+  flex-direction: row;
+  display: none;
+  align-items: center;
+  padding: 16px;
+  color: #870000;
+}
+
+.login .success {
+  background-image: linear-gradient(
+    rgb(175, 247, 204),
+    rgb(175, 247, 204)
+  );
+  border: 1px solid rgba(50, 205, 50, 0.604);
+  color: #24292f;
 }
 
 @media screen and (min-width: 413px) {
@@ -153,7 +177,7 @@ body {
 
 @media screen and (max-height: 620px) {
   .home {
-    height: 700px;
+    height: 750px;
     position: relative;
   }
 }
@@ -220,17 +244,23 @@ body {
   padding: 10px;
   align-items: center;
   justify-content: center;
+  fill: #666;
+  color: #666;
+}
+
+.services .item:hover {
+  fill: #870000;
+  color: #870000;
+  box-shadow: #87000073 0px 0px 0px 1px, #870000 0px 0px 0px 1px inset;
 }
 
 .services .item .title {
   font: 500 20px "SolaimanLipi", monospace;
   margin-top: 10px;
-  color: #666;
 }
 
-.services .item .icon img {
+.services .item .icon svg {
   width: 75px;
-  fill: #666;
 }
 
 /* cement */
@@ -265,6 +295,7 @@ h1 {
   justify-content: center;
   height: 220px;
   margin-bottom: 20px;
+  cursor: pointer;
 }
 
 .container .item img {
@@ -360,6 +391,7 @@ label {
   /* height: calc(100vh - 212px); */
   margin-bottom: 20px;
   font-family: "SolaimanLipi", monospace;
+  margin-bottom: 65px;
 }
 
 .table h1 {
@@ -367,8 +399,51 @@ label {
   text-align: left;
   padding-bottom: 10px;
   font-size: 25px;
-  margin-bottom: 16px;
+
   border-bottom: 1px solid #edecfb;
+}
+
+.table .interval {
+  display: flex;
+  flex-direction: row;
+  margin-top: 10px;
+  margin-bottom: 16px;
+  width: 100%;
+  border-bottom: 1px solid #edecfb;
+}
+
+.buttons {
+  position: fixed;
+  display: flex;
+  flex-direction: row;
+  right: 10px;
+  bottom: 50px;
+}
+
+.buttons svg {
+  height: 23px;
+  margin: 10px;
+  padding: 10px;
+  box-shadow: rgba(95, 1, 1, 0.05) 0px 0px 0px 1px,
+    #870000 0px 0px 0px 1px inset;
+  border-radius: 6px;
+  fill: #870000;
+  cursor: pointer;
+}
+
+.table .interval input {
+  margin-top: 5px;
+  margin-bottom: 16px;
+  padding: 6px 12px;
+  width: calc(100% - 26px);
+  /* border-radius: 6px; */
+  color: #24292f;
+  border: 1px solid #d0d7de;
+  outline: none;
+  font-size: 17px;
+  transition: all 0.35s;
+  font-family: "SolaimanLipi", monospace;
+  background-color: #fcfcfc;
 }
 
 .table .wrapper {
@@ -380,6 +455,7 @@ label {
   width: 100%;
   border-collapse: collapse;
   table-layout: fixed;
+  border: none;
 }
 
 .table table thead th {

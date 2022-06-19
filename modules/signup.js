@@ -1,8 +1,9 @@
 import d from "../assets/js/NTechDOM.js";
-import { home } from "./home.js";
 import { inputList } from "./input.js";
-import { pages } from "./pages.js";
-const login = d.createElement("div").setAttribute({ class: "login" });
+
+const signup = d
+  .createElement("div")
+  .setAttribute({ class: "login" });
 const logo = d.createElement(
   "svg",
 
@@ -76,9 +77,18 @@ const password = d.createElement("input").setAttribute({
   onchange: "nin(this, '2')",
 });
 
+const con_password = d.createElement("input").setAttribute({
+  required: "",
+  autocomplete: "off",
+  type: "password",
+  placeholder: "Please enter confirm password",
+  onchange: "nin(this, '3')",
+});
+
 const FormInput = {
   email: "Email Address",
   password: "Password",
+  con_password: "Confirm Password",
 };
 
 for (let x in FormInput) {
@@ -96,7 +106,7 @@ for (let x in FormInput) {
 //   ],
 // });
 
-const submit = d.createElement("button", "Login", {
+const submit = d.createElement("button", "Sign Up", {
   class: "submitBtn",
   type: "submit",
 });
@@ -112,10 +122,21 @@ const closeBtn = `
 `;
 error.append(errDiv, closeBtn);
 
-form.append(submit, error);
-login.append(logo, form);
+const success = d.createElement("div", "", { class: "success" });
+const succDiv = d.createElement("div", "", {
+  style: "width: 100%; text-align: left;",
+});
+const closeBtn2 = `
+<svg onclick="closeDiv('.success')" aria-hidden="true" style="fill: rgb(34, 207, 92); cursor: pointer" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-x">
+    <path fill-rule="evenodd" d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z"></path>
+</svg>
+`;
+success.append(succDiv, closeBtn2);
 
-const loginRequest = () => {
+form.append(submit, error, success);
+signup.append(logo, form);
+
+const signupRequest = () => {
   submit
     .setChildren("Processing...")
     .changeAttribute("disabled", "")
@@ -123,53 +144,58 @@ const loginRequest = () => {
       "background: #870000c9; color: #fcfcfcb0;",
     ]);
   error.changeAttribute("style", "display: none;");
-  d.post(
-    "https://script.google.com/macros/s/AKfycbymExR-OQWZdIEkT6AeLqj9mY92JzS_ucnntS2L/exec",
-    {
-      type: 1,
-      data: JSON.stringify({
-        email: email.getAttribute("value")[0],
-        password: password.getAttribute("value")[0],
-      }),
-    }
-  ).then((res) => {
-    res = JSON.parse(JSON.parse(res).messege);
-    const { result, messege, data } = res;
-    if (result) {
-      if (messege === "email") {
-        errDiv.setChildren("Email doesn't found!");
-        error.changeAttribute("style", "display: flex");
-        submit
-          .setChildren("Login")
-          .removeAttribute("disabled", "style");
-      } else if (messege === "password") {
-        errDiv.setChildren("Password isn't correct!");
-        error.changeAttribute("style", "display: flex");
-        submit
-          .setChildren("Login")
-          .removeAttribute("disabled", "style");
-      } else if (messege === "success") {
-        home._loginData = data;
-        window.localStorage["com.infc.agency.habib-brother's.login"] =
-          data;
-        pages.root = "home";
-        pages.page = { ...pages.list };
-        window.location = "#/home";
+  success.changeAttribute("style", "display: none;");
+  if (
+    password.getAttribute("value")[0] !==
+    con_password.getAttribute("value")[0]
+  ) {
+    errDiv.setChildren("Confirm Password doesn't match!");
+    error.changeAttribute("style", "display: flex");
+    submit
+      .setChildren("Sign UP")
+      .removeAttribute("disabled", "style");
+  } else {
+    d.post(
+      "https://script.google.com/macros/s/AKfycbymExR-OQWZdIEkT6AeLqj9mY92JzS_ucnntS2L/exec",
+      {
+        type: "2",
+        data: JSON.stringify({
+          email: email.getAttribute("value")[0],
+          password: password.getAttribute("value")[0],
+        }),
       }
-    }
-  });
+    ).then((res) => {
+      res = JSON.parse(JSON.parse(res).messege);
+      if (res.result) {
+        if (res.messege === "success") {
+          succDiv.setChildren("Congratulation! You are successed.");
+          success.changeAttribute("style", "display: flex");
+          form.removeElement(submit);
+        } else {
+          errDiv.setChildren("Something is wrong!");
+          error.changeAttribute("style", "display: flex");
+          submit
+            .setChildren("Sign Up")
+            .removeAttribute("disabled", "style");
+        }
+      }
+    });
+  }
 };
 
-login.onload = () => {
+signup.onload = () => {
   inputList.input = {
     1: email,
     2: password,
+    3: con_password,
   };
-  pages.page.login = "login";
-  pages.root = "login";
   document.forms["form"].onsubmit = (e) => {
     e.preventDefault();
-    loginRequest();
+    signupRequest();
   };
 };
-export { login };
+
+d.render("root", signup);
+window.closeDiv = (q) => {
+  document.querySelector(q).style.display = "none";
+};

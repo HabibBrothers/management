@@ -2,7 +2,7 @@ import d from "../assets/js/NTechDOM.js";
 import { header } from "./header.js";
 import { footer } from "./footer.js";
 
-const Form = d.createElement("div");
+const labourShahAdd = d.createElement("div");
 const main = d.createElement("main").setAttribute({ class: "main" });
 const h1 = d.createElement("h1", "শাহ্ সিমেন্ট লেভার হিসাব");
 
@@ -71,5 +71,10 @@ const button = d.createElement("button", "যোগ করুন", {
 
 form.append(button);
 main.append(h1, form);
-Form.append(header, main, footer);
-export { Form };
+labourShahAdd.append(header, main, footer);
+
+labourShahAdd.onload = () => {
+  header.onload();
+  footer.onload();
+};
+export { labourShahAdd };
