@@ -88,5 +88,165 @@ class IDB {
       };
     });
   }
+  
+  // delete value
+  remove(key) {
+    return new Promise((resolve, reject) => {
+      let request = window.indexedDB.open(this.name);
+      request.onsuccess = (e) => {
+        let db = e.target.result;
+        let transaction = db
+          .transaction([this.dataBase], "readwrite")
+          .objectStore(this.dataBase);
+        if (key.constructor.toString().indexOf("Array") >= 0) {
+          key.forEach((data, index) => {
+            let request = transaction.delete(data);
+            if (index == key.length - 1) {
+              request.onsuccess = () => {
+                resolve("success");
+                db.close();
+              };
+            }
+            request.onerror = (err) => {
+              db.close();
+              reject(err);
+            };
+          });
+        } else {
+          let request = transaction.delete(key);
+          request.onsuccess = () => {
+            resolve("success");
+            db.close();
+          };
+          request.onerror = (err) => {
+            db.close();
+            reject(err);
+          };
+        }
+      };
+    });
+  }
+  
+  // get data
+  get(key) {
+    return new Promise((resolve, reject) => {
+      let request = window.indexedDB.open(this.name);
+      request.onsuccess = (e) => {
+        let db = e.target.result;
+        let transaction = db
+          .transaction([this.dataBase])
+          .objectStore(this.dataBase);
+        if (key.constructor.toString().indexOf("Array") >= 0) {
+          let result = [];
+          key.forEach((data, index) => {
+            let request = transaction.get(data);
+            request.onsuccess = (e) => {
+              result.push(e.target.result);
+              if(index == key.length - 1){
+                resolve(data);
+                db.close();
+              }
+            }
+            request.onerror = (err) => {
+              db.close();
+              reject(err);
+            };
+          });
+        } else {
+          let request = transaction.get(key);
+          request.onsuccess = (e) => {
+            resolve(e.target.result);
+            db.close();
+          };
+          request.onerror = (err) => {
+            db.close();
+            reject(err);
+          };
+        }
+      };
+    });
+  }
+  
+  // put value
+  put(key, value) {
+    return new Promise((resolve, reject) => {
+      let request = window.indexedDB.open(this.name);
+      request.onsuccess = (e) => {
+        let db = e.target.result;
+        let transaction = db
+          .transaction([this.dataBase], "readwrite")
+          .objectStore(this.dataBase);
+        let request = transaction.get(key);
+        request.onsuccess = (e) => {
+          let data = e.target.result;
+          data = {...data, ...value};
+          let requestUpdate = transaction.put(data);
+          requestUpdate.onsuccess = () => {
+            resolve("success");
+            db.close();
+          }
+          requestUpdate.onerror = (err) => {
+            db.close();
+            reject(err)
+          }
+        };
+        request.onerror = (err) => {
+          db.close();
+          reject(err);
+        };
+      };
+    });
+  }
+  
+  // get All
+  getAll() {
+    return new Promise((resolve, reject) => {
+      let request = window.indexedDB.open(this.name);
+      request.onsuccess = (e) => {
+        let db = e.target.result;
+        let transaction = db
+          .transaction(this.dataBase)
+          .objectStore(this.dataBase);
+        let request = transaction.getAll();
+        request.onsuccess = (e) => {
+          resolve(e.target.result);
+          db.close();
+        };
+        request.onerror = (err) => {
+          db.close();
+          reject(err);
+        };
+      };
+    });
+  }
+  
+  // get All
+  getAllValues(type) {
+    return new Promise((resolve, reject) => {
+      let request = window.indexedDB.open(this.name);
+      request.onsuccess = (e) => {
+        let db = e.target.result;
+        let transaction = db
+          .transaction(this.dataBase)
+          .objectStore(this.dataBase);
+        let request = transaction.openCursor();
+        const values = [];
+        request.onsuccess = (e) => {
+          const cursor = e.target.result;
+          if(cursor){
+            values.push(cursor.value[type]);
+            cursor.continue();
+          } else{
+            resolve(values);
+            db.close();
+          }
+        };
+        request.onerror = (err) => {
+          db.close();
+          reject(err);
+        };
+      };
+    });
+  }
 }
 export default IDB;

@@ -16,9 +16,25 @@
     s = new Date()
     let database = await idb.createDataBase("test1", {keyPath: "date"});
     console.log(version, database, new Date() - s)
-    s = new Date();
-    let addData = await idb.add({date: 1, data: [1, 2, 3]});
-    console.log(addData, new Date() - s)
+   
+    try{
+       s = new Date();
+       let addData = await idb.add({date: 1, data: [1, 2, 3]});
+       console.log(addData, new Date() - s);
+    }
+    catch(err){
+      console.log(err.target.error)
+    }
+
+    let data = await idb.put(1, {data: [45, 47, 7]});
+    console.log(data)
+    
+    let all = await idb.getAllValues("date");
+    console.log(all)
+    // s = new Date();
+    // let deleteData = await idb.remove(1);
+    // console.log(deleteData, new Date() - s);
+    
   </script>
 </body>
 </html>
