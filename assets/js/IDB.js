@@ -15,6 +15,25 @@ class IDB {
       request.onerror = reject;
     });
   }
+  
+  // existing database
+  exit(database) {
+    return new Promise((resolve, reject) => {
+      let request = window.indexedDB.open(this.name);
+      request.onsuccess = (e) => {
+        let dataBases = e.target.result.objectStoreNames;
+        e.target.result.close();
+        for(let i = 0; i < dataBases.length; i++){
+          if(dataBases[i] === database){
+            resolve(true);
+            return;
+          }
+        }
+        resolve(false);
+      };
+      request.onerror = reject;
+    });
+  }
 
   // create new data base
   createDataBase(databaseName, option = { autoIncrement: true }) {

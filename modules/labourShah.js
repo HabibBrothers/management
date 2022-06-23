@@ -1,6 +1,7 @@
 import d from "../assets/js/NTechDOM.js";
 import { header } from "./header.js";
 import { footer } from "./footer.js";
+import db from "../assets/js/IDB.js";
 
 const labourShah = d.createElement("div");
 const main = d
@@ -47,13 +48,16 @@ thead.append(theadTr);
 
 const tbody = d.createElement("tbody");
 
-for (let i = 1; i < 20; i++) {
-  const tr = d.createElement("tr");
-  for (let x of titles) {
-    tr.append(d.createElement("td", x));
+const dataPrint = (data) => {
+  for(let i = 0; i < data.length; i++){
+    const tr = d.createElement("tr");
+    for (let j = 0; j < data[i].length; j++) {
+      tr.append(d.createElement("td", data[i][j]));
+    }
+    tbody.append(tr);
   }
-  tbody.append(tr);
 }
+
 table.append(thead, tbody);
 tableWrapper.append(table);
 
@@ -85,8 +89,24 @@ const buttons = d.createElement(
 );
 labourShah.append(header, main, buttons, footer);
 
-labourShah.onload = () => {
+labourShah.onload = async () => {
   header.onload();
   footer.onload();
+  /*let year = new Date().getFullYear();
+  let month = new Date().getMonth() + 1;
+  const idb = new db("com.infc.agency.habib-brother's");
+  let presentMonthDatabase = "labourShah" + year + String(month).padStart(2, '0');
+  let pastMonthDatabase = "labourShah" + year + String((month - 1) ? (month - 1) : 12).padStart(2, '0');
+  let presentMonth = await idb.exit(presentMonthDatabase);
+  let pastMonth = await idb.exit(pastMonthDatabase);
+ /* if(presentMonth && pastMonth){
+    let database = await idb.createDataBase(presentMonthDatabase, {keyPath: "date"});
+    let data = await idb.getAllValues("data");
+    dataPrint(data)
+  } else{
+   // let database = await idb.createDataBase(presentMonthDatabase, {keyPath: "date"});
+    
+  }*/
+  
 };
 export { labourShah };
