@@ -23,7 +23,7 @@ const weatherImg = d.createElement(
 weather.append(weatherImg);
 const services = d
   .createElement("div")
-  .setAttribute({ class: "services" });
+  .setAttribute({ class: ["services"] });
 
 const labour = d.createElement("div").setAttribute({
   class: "item",
@@ -341,6 +341,7 @@ services.append(labour, truck, ship, giveTake);
 home.onload = () => {
   header.onload();
   footer.onload();
+  header.page = "home";
   d.post("https://srv2.weatherwidget.org/data/", {
     v: 1.2,
     a: '{"t":"horizontal","lang":"bn","ids":["wl10573"],"cl_bkg":"#FFFFFF","cl_font":"#000000","cl_cloud":"#d4d4d4","cl_persp":"#2196F3","cl_sun":"#FFC107","cl_moon":"#FFC107","cl_thund":"#FF5722","sl_sot":"celcius","sl_ics":"one_a","font":"Arial"}',

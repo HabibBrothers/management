@@ -3,8 +3,8 @@ import { pages } from "../../modules/pages.js";
 import { login } from "../../modules/login.js";
 import { home } from "../../modules/home.js";
 import { labour } from "../../modules/labour.js";
-import { labourShah } from "../../modules/labourShah.js";
-import { labourShahAdd } from "../../modules/labourShahAdd.js";
+import { labourTable } from "../../modules/labourTable.js";
+import { labourAdd } from "../../modules/labourAdd.js";
 
 if (window.localStorage["com.infc.agency.habib-brother's.login"]) {
   pages.root = "home";

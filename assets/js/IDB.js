@@ -15,7 +15,7 @@ class IDB {
       request.onerror = reject;
     });
   }
-  
+
   // existing database
   exit(database) {
     return new Promise((resolve, reject) => {
@@ -23,8 +23,8 @@ class IDB {
       request.onsuccess = (e) => {
         let dataBases = e.target.result.objectStoreNames;
         e.target.result.close();
-        for(let i = 0; i < dataBases.length; i++){
-          if(dataBases[i] === database){
+        for (let i = 0; i < dataBases.length; i++) {
+          if (dataBases[i] === database) {
             resolve(true);
             return;
           }
@@ -44,7 +44,6 @@ class IDB {
         let dataBases = e.target.result.objectStoreNames;
         e.target.result.close();
         for (let i = 0; i < dataBases.length; i++) {
-          console.log(dataBases[i]);
           if (dataBases[i] == databaseName) {
             this.dataBase = databaseName;
             resolve(this.dataBase);
@@ -93,6 +92,7 @@ class IDB {
               reject(err);
             };
           });
+          db.close();
         } else {
           let request = transaction.add(value);
           request.onsuccess = () => {
@@ -107,7 +107,7 @@ class IDB {
       };
     });
   }
-  
+
   // delete value
   remove(key) {
     return new Promise((resolve, reject) => {
@@ -131,6 +131,7 @@ class IDB {
               reject(err);
             };
           });
+          db.close();
         } else {
           let request = transaction.delete(key);
           request.onsuccess = () => {
@@ -145,7 +146,7 @@ class IDB {
       };
     });
   }
-  
+
   // get data
   get(key) {
     return new Promise((resolve, reject) => {
@@ -161,16 +162,17 @@ class IDB {
             let request = transaction.get(data);
             request.onsuccess = (e) => {
               result.push(e.target.result);
-              if(index == key.length - 1){
+              if (index == key.length - 1) {
                 resolve(data);
                 db.close();
               }
-            }
+            };
             request.onerror = (err) => {
               db.close();
               reject(err);
             };
           });
+          db.close();
         } else {
           let request = transaction.get(key);
           request.onsuccess = (e) => {
@@ -185,7 +187,7 @@ class IDB {
       };
     });
   }
-  
+
   // put value
   put(key, value) {
     return new Promise((resolve, reject) => {
@@ -198,16 +200,16 @@ class IDB {
         let request = transaction.get(key);
         request.onsuccess = (e) => {
           let data = e.target.result;
-          data = {...data, ...value};
+          data = { ...data, ...value };
           let requestUpdate = transaction.put(data);
           requestUpdate.onsuccess = () => {
             resolve("success");
             db.close();
-          }
+          };
           requestUpdate.onerror = (err) => {
             db.close();
-            reject(err)
-          }
+            reject(err);
+          };
         };
         request.onerror = (err) => {
           db.close();
@@ -216,7 +218,7 @@ class IDB {
       };
     });
   }
-  
+
   // get All
   getAll() {
     return new Promise((resolve, reject) => {
@@ -238,7 +240,7 @@ class IDB {
       };
     });
   }
-  
+
   // get All
   getAllValues(type) {
     return new Promise((resolve, reject) => {
@@ -252,10 +254,10 @@ class IDB {
         const values = [];
         request.onsuccess = (e) => {
           const cursor = e.target.result;
-          if(cursor){
+          if (cursor) {
             values.push(cursor.value[type]);
             cursor.continue();
-          } else{
+          } else {
             resolve(values);
             db.close();
           }

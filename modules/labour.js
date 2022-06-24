@@ -16,7 +16,7 @@ const shah = d.createElement(
   d
     .createElement("img")
     .setAttribute({ alt: "shah", src: "./assets/img/shah.png" }),
-  { class: "item", onclick: "window.location='#/labourShah'" }
+  { class: "item", cement: "shah" }
 );
 
 const scan = d.createElement(
@@ -24,7 +24,7 @@ const scan = d.createElement(
   d
     .createElement("img")
     .setAttribute({ alt: "scan", src: "./assets/img/scan.png" }),
-  { class: "item", onclick: "window.location='#/labourScan'" }
+  { class: "item", cement: "scan" }
 );
 
 const crown = d.createElement(
@@ -33,7 +33,7 @@ const crown = d.createElement(
     alt: "crown",
     src: "./assets/img/crown.png",
   }),
-  { class: "item", onclick: "window.location='#/labourCrown'" }
+  { class: "item", cement: "crown" }
 );
 
 const premier = d.createElement(
@@ -42,7 +42,7 @@ const premier = d.createElement(
     alt: "crown",
     src: "./assets/img/premier.png",
   }),
-  { class: "item", onclick: "window.location='#/labourPremier'" }
+  { class: "item", cement: "premier" }
 );
 
 container.append(shah, scan, crown, premier);
@@ -50,9 +50,24 @@ main.append(h1, container);
 
 labour.append(header, main, footer);
 
+const cements = {
+  1: "shah",
+  2: "scan",
+  3: "crown",
+  4: "premier",
+};
+
 labour.onload = () => {
   header.onload();
   footer.onload();
+  header.page = "labour";
+  for (let x in cements) {
+    document.querySelector(`.item[cement=${cements[x]}]`).onclick =
+      () => {
+        header.cement = cements[x];
+        window.location = "#/labourTable";
+      };
+  }
 };
 
 export { labour };
