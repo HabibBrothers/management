@@ -5,6 +5,8 @@ import { home } from "../../modules/home.js";
 import { labour } from "../../modules/labour.js";
 import { labourTable } from "../../modules/labourTable.js";
 import { labourAdd } from "../../modules/labourAdd.js";
+import { truck } from "../../modules/truck.js";
+import { truckAdd } from "../../modules/truckAdd.js";
 
 if (window.localStorage["com.infc.agency.habib-brother's.login"]) {
   pages.root = "home";

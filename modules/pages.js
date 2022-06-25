@@ -5,6 +5,8 @@ const pages = {
     labour: "labour",
     labourTable: "labourTable",
     labourAdd: "labourAdd",
+    truck: "truck",
+    truckAdd: "truckAdd",
   },
   page: {},
   root: "login",
