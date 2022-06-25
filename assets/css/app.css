@@ -75,6 +75,11 @@ body {
   color: #24292f;
 }
 
+.form .success,
+.form .error {
+  font-family: "SolaimanLipi" !important;
+}
+
 @media screen and (min-width: 413px) {
   .login .form {
     width: 300px;

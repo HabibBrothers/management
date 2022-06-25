@@ -114,8 +114,8 @@ const addRequest = async () => {
   error.changeAttribute("style", "display: none;");
   success.changeAttribute("style", "display: none;");
   const { cement } = header;
-  let year = new Date().getFullYear();
-  let month = new Date().getMonth() + 1;
+  let year = new Date(date.getAttribute("value")[0]).getFullYear();
+  let month = new Date(date.getAttribute("value")[0]).getMonth() + 1;
   const idb = new db("com.infc.agency.habib-brother's");
   let presentMonthDatabase =
     "labour" + cement + year + String(month).padStart(2, "0");
@@ -134,13 +134,30 @@ const addRequest = async () => {
         new Date().toString(),
       ],
     })
-    .then((res) => {
+    .then(async (res) => {
       if (res == "success") {
         succDiv.setChildren("অসাধারণ! আপনি সফল হয়েছেন।");
         success.changeAttribute("style", "display: flex");
         button
           .setChildren("যোগ করুন")
           .removeAttribute("disabled", "style");
+        let data = await idb.getAllValues("data");
+        data = data.map((value) => {
+          value[0] = "d" + value[0];
+          return value;
+        });
+        d.post(
+          "https://script.google.com/macros/s/AKfycbymExR-OQWZdIEkT6AeLqj9mY92JzS_ucnntS2L/exec",
+          {
+            type: 4,
+            data: JSON.stringify({
+              year: year,
+              month: month,
+              cement: cement,
+              data: data,
+            }),
+          }
+        ).catch((err) => console.log(err));
       } else {
         errDiv.setChildren("ওহ! সমস্যা হয়েছে।");
         error.changeAttribute("style", "display: flex");
@@ -187,13 +204,30 @@ const editRequest = async (date) => {
         new Date().toString(),
       ],
     })
-    .then((res) => {
+    .then(async (res) => {
       if (res == "success") {
         succDiv.setChildren("অসাধারণ! আপনি সফল হয়েছেন।");
         success.changeAttribute("style", "display: flex");
         button
           .setChildren("ইডিট করুন")
           .removeAttribute("disabled", "style");
+        let data = await idb.getAllValues("data");
+        data = data.map((value) => {
+          value[0] = "d" + value[0];
+          return value;
+        });
+        d.post(
+          "https://script.google.com/macros/s/AKfycbymExR-OQWZdIEkT6AeLqj9mY92JzS_ucnntS2L/exec",
+          {
+            type: 4,
+            data: JSON.stringify({
+              year: year,
+              month: month,
+              cement: cement,
+              data: data,
+            }),
+          }
+        ).catch((err) => console.log(err));
       } else {
         errDiv.setChildren("ওহ! সমস্যা হয়েছে।");
         error.changeAttribute("style", "display: flex");
@@ -231,11 +265,28 @@ const deleteRequest = async (date) => {
   });
   idb
     .remove(date)
-    .then((res) => {
+    .then(async (res) => {
       if (res == "success") {
         succDiv.setChildren("অসাধারণ! আপনি সফল হয়েছেন।");
         success.changeAttribute("style", "display: flex");
         form.removeElement(button2);
+        let data = await idb.getAllValues("data");
+        data = data.map((value) => {
+          value[0] = "d" + value[0];
+          return value;
+        });
+        d.post(
+          "https://script.google.com/macros/s/AKfycbymExR-OQWZdIEkT6AeLqj9mY92JzS_ucnntS2L/exec",
+          {
+            type: 4,
+            data: JSON.stringify({
+              year: year,
+              month: month,
+              cement: cement,
+              data: data,
+            }),
+          }
+        ).catch((err) => console.log(err));
       } else {
         errDiv.setChildren("ওহ! সমস্যা হয়েছে।");
         error.changeAttribute("style", "display: flex");
@@ -243,7 +294,7 @@ const deleteRequest = async (date) => {
       }
     })
     .catch((err) => {
-      errDiv.setChildren("ওহ! সমস্যা হয়েছে। তারিখ চেক করুন।");
+      errDiv.setChildren("ওহ! সমস্যা হয়েছে।");
       error.changeAttribute("style", "display: flex");
       form.removeElement(button2);
     });
@@ -259,6 +310,7 @@ labourAdd.onload = () => {
   const { cement } = header;
   header.page = cement + "laborAdd";
   h1.setChildren(`${cements[cement]} সিমেন্ট লেভার`);
+  form.reset();
   cementName.changeAttribute("value", `${cements[cement]} সিমেন্ট`);
   if (header.labourEdit) {
     const { data } = header.labourEdit;
@@ -271,13 +323,13 @@ labourAdd.onload = () => {
         "/" +
         new Date(data[0]).getFullYear()
     );
+    button2.init();
     date.changeAttribute("disabled", "");
     quantity.changeAttribute("value", data[2]);
     rate.changeAttribute("value", data[3]);
     total.changeAttribute("value", data[4]);
     button.setChildren("ইডিট করুন");
     form.append(button2);
-
     document.querySelector(".submitBtn2").onclick = () => {
       form.removeElement(button);
       deleteRequest(data[0]);
@@ -295,7 +347,14 @@ labourAdd.onload = () => {
         "-" +
         String(new Date().getDate()).padStart(2, "0")
     );
-
+    date.changeAttribute(
+      "max",
+      new Date().getFullYear() +
+        "-" +
+        String(new Date().getMonth() + 1).padStart(2, "0") +
+        "-" +
+        String(new Date().getDate()).padStart(2, "0")
+    );
     document.forms["form"].onsubmit = (e) => {
       e.preventDefault();
       addRequest();

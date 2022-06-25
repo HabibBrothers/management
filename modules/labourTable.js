@@ -88,16 +88,6 @@ const dataPrint = (data) => {
           { style: "padding: 0;" }
         )
       )
-      // d.createElement(
-      //   "td",
-      //   d.createElement("img").setAttribute(
-      //     {
-      //       src: "./assets/img/delete.svg",
-      //       delete: i,
-      //     },
-      //     { style: "padding: 0;" }
-      //   )
-      // )
     );
     tbody.append(tr);
   }
@@ -152,6 +142,7 @@ labourTable.onload = async () => {
   }
   header.onload();
   footer.onload();
+  delete header.labourEdit;
   const { cement } = header;
   const page = cement + "laborTable";
   header.page = page;
@@ -181,16 +172,37 @@ labourTable.onload = async () => {
     let database = await idb.createDataBase(presentMonthDatabase, {
       keyPath: "date",
     });
-    let data = await idb.getAllValues("data");
-    dataPrint(data);
-    for (let i = 0; i < data.length; i++) {
-      document.querySelector(`img[edit="${i}"]`).onclick = () => {
-        header.labourEdit = {
-          data: data[i],
+    try {
+      let data = await idb.getAllValues("data");
+      dataPrint(data);
+      for (let i = 0; i < data.length; i++) {
+        document.querySelector(`img[edit="${i}"]`).onclick = () => {
+          header.labourEdit = {
+            data: data[i],
+          };
+          window.location = "#/labourAdd";
         };
-        window.location = "#/labourAdd";
-      };
+      }
+    } catch (err) {
+      console.log(err);
     }
+    let data = await idb.getAllValues("data");
+    data = data.map((value) => {
+      value[0] = "d" + value[0];
+      return value;
+    });
+    d.post(
+      "https://script.google.com/macros/s/AKfycbymExR-OQWZdIEkT6AeLqj9mY92JzS_ucnntS2L/exec",
+      {
+        type: 4,
+        data: JSON.stringify({
+          year: year,
+          month: month,
+          cement: cement,
+          data: data,
+        }),
+      }
+    ).catch((err) => console.log(err));
   } else {
     d.post(
       "https://script.google.com/macros/s/AKfycbymExR-OQWZdIEkT6AeLqj9mY92JzS_ucnntS2L/exec",
@@ -220,12 +232,11 @@ labourTable.onload = async () => {
             labourTable._render();
           const finalDataPast = [];
           for (let i = 0; i < past.length; i++) {
-            for (let j = 0; j < past[i].length; j++) {
-              finalDataPast.push({
-                date: new Date(past[i][j]).getDate(),
-                data: past[i][j],
-              });
-            }
+            past[i][0] = past[i][0].substr(1);
+            finalDataPast.push({
+              date: past[i][0],
+              data: past[i],
+            });
           }
           let database = await idb.createDataBase(pastMonthDatabase, {
             keyPath: "date",
@@ -233,12 +244,11 @@ labourTable.onload = async () => {
           idb.add(finalDataPast);
           const finalDataPresent = [];
           for (let i = 0; i < present.length; i++) {
-            for (let j = 0; j < present[i].length; j++) {
-              finalDataPresent.push({
-                date: new Date(present[i][j]).getDate(),
-                data: present[i][j],
-              });
-            }
+            present[i][0] = present[i][0].substr(1);
+            finalDataPresent.push({
+              date: present[i][0],
+              data: present[i],
+            });
           }
           database = await idb.createDataBase(presentMonthDatabase, {
             keyPath: "date",
