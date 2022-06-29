@@ -4,7 +4,7 @@ import { footer } from "./footer.js";
 import { loading } from "./loading.js";
 import db from "../assets/js/IDB.js";
 
-const labourTable = d.createElement("div");
+const shipTable = d.createElement("div");
 const main = d
   .createElement("main")
   .setAttribute({ class: ["main", "table"] });
@@ -35,11 +35,12 @@ const thead = d.createElement("thead");
 const titles = [
   "তারিখ",
   "সিমেন্ট নাম",
-  "পরিমাণ",
-  "দর",
-  "মোট",
+  "জাহাজের নাম",
+  "মাঝির নাম",
+  "মাঝির ফোন",
+  "মালের পরিমাণ",
+  "টাকা",
   "আপডেট",
-  // "ডিলিট",
 ];
 
 const theadTr = d.createElement("tr");
@@ -116,13 +117,13 @@ const buttons = d.createElement(
   455,242.5 "/>`,
       {
         viewBox: "0 0 455 455",
-        onclick: "window.location='#/labourAdd'",
+        onclick: "window.location='#/shipAdd'",
       }
     ),
   ],
   { class: "buttons" }
 );
-labourTable.append(header, main, footer);
+shipTable.append(header, main, footer);
 
 const cements = {
   shah: "শাহ্",
@@ -135,25 +136,25 @@ const dateList = {
   1: startDate,
   2: endDate,
 };
-labourTable.onload = async () => {
+shipTable.onload = async () => {
   if (!header.cement) {
-    window.location = "#/labour";
+    window.location = "#/ship";
     return;
   }
   header.onload();
   footer.onload();
-  delete header.labourEdit;
+  delete header.shipEdit;
   const { cement } = header;
-  const page = cement + "laborTable";
+  const page = cement + "shipTable";
   header.page = page;
-  h1.setChildren(`${cements[cement]} সিমেন্ট লেভার হিসাব`);
+  h1.setChildren(`${cements[cement]} জাহাজ হিসাব`);
   let year = new Date().getFullYear();
   let month = new Date().getMonth() + 1;
   const idb = new db("com.infc.agency.habib-brother's");
   let presentMonthDatabase =
-    "labour" + cement + year + String(month).padStart(2, "0");
+    "ship" + cement + year + String(month).padStart(2, "0");
   let pastMonthDatabase =
-    "labour" +
+    "ship" +
     cement +
     year +
     String(month - 1 ? month - 1 : 12).padStart(2, "0");
@@ -166,9 +167,9 @@ labourTable.onload = async () => {
     endDate.changeAttribute("max", end);
     endDate.changeAttribute("min", start);
     main.setChildren([h1, interval, tableWrapper]);
-    labourTable._rendered = false;
-    labourTable.insert(2, buttons);
-    document.getElementById("root").innerHTML = labourTable._render();
+    shipTable._rendered = false;
+    shipTable.insert(2, buttons);
+    document.getElementById("root").innerHTML = shipTable._render();
     let database = await idb.createDataBase(presentMonthDatabase, {
       keyPath: "date",
     });
@@ -177,10 +178,10 @@ labourTable.onload = async () => {
       dataPrint(data);
       for (let i = 0; i < data.length; i++) {
         document.querySelector(`img[edit="${i}"]`).onclick = () => {
-          header.labourEdit = {
+          header.shipEdit = {
             data: data[i],
           };
-          window.location = "#/labourAdd";
+          window.location = "#/shipAdd";
         };
       }
     } catch (err) {
@@ -194,7 +195,7 @@ labourTable.onload = async () => {
     d.post(
       "https://script.google.com/macros/s/AKfycbymExR-OQWZdIEkT6AeLqj9mY92JzS_ucnntS2L/exec",
       {
-        type: 4,
+        type: 8,
         data: JSON.stringify({
           year: year,
           month: month,
@@ -207,7 +208,7 @@ labourTable.onload = async () => {
     d.post(
       "https://script.google.com/macros/s/AKfycbymExR-OQWZdIEkT6AeLqj9mY92JzS_ucnntS2L/exec",
       {
-        type: 3,
+        type: 7,
         data: JSON.stringify({
           year: year,
           month: month - 1,
@@ -226,10 +227,10 @@ labourTable.onload = async () => {
           endDate.changeAttribute("max", end);
           endDate.changeAttribute("min", start);
           main.setChildren([h1, interval, tableWrapper]);
-          labourTable._rendered = false;
-          labourTable.insert(2, buttons);
+          shipTable._rendered = false;
+          shipTable.insert(2, buttons);
           document.getElementById("root").innerHTML =
-            labourTable._render();
+            shipTable._render();
           const finalDataPast = [];
           for (let i = 0; i < past.length; i++) {
             past[i] = past[i].map((v) => v.substr(1));
@@ -259,10 +260,10 @@ labourTable.onload = async () => {
           for (let i = 0; i < data.length; i++) {
             document.querySelector(`img[edit="${i}"]`).onclick =
               () => {
-                header.labourEdit = {
+                header.shipEdit = {
                   data: data[i],
                 };
-                window.location = "#/labourAdd";
+                window.location = "#/shipAdd";
               };
           }
         }
@@ -340,4 +341,4 @@ function getInterval(date = "") {
 
   return result;
 }
-export { labourTable };
+export { shipTable };

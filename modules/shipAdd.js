@@ -3,7 +3,7 @@ import { header } from "./header.js";
 import { footer } from "./footer.js";
 import db from "../assets/js/IDB.js";
 
-const labourAdd = d.createElement("div");
+const shipAdd = d.createElement("div");
 const main = d.createElement("main").setAttribute({ class: "main" });
 const h1 = d.createElement("h1");
 
@@ -22,6 +22,27 @@ const date = d.createElement("input").setAttribute({
   onchange: "nin(this, 'date')",
 });
 
+const shipName = d.createElement("input").setAttribute({
+  required: "",
+  autocomplete: "off",
+  type: "text",
+  oninput: "nin(this, 'shipName')",
+});
+
+const boatMan = d.createElement("input").setAttribute({
+  required: "",
+  autocomplete: "off",
+  type: "text",
+  oninput: "nin(this, 'boatMan')",
+});
+
+const boatManPhone = d.createElement("input").setAttribute({
+  required: "",
+  autocomplete: "off",
+  type: "number",
+  oninput: "nin(this, 'boatManPhone')",
+});
+
 const quantity = d.createElement("input").setAttribute({
   required: "",
   autocomplete: "off",
@@ -29,19 +50,11 @@ const quantity = d.createElement("input").setAttribute({
   oninput: "nin(this, 'quantity')",
 });
 
-const rate = d.createElement("input").setAttribute({
+const taka = d.createElement("input").setAttribute({
   required: "",
   autocomplete: "off",
   type: "number",
-  oninput: "nin(this, 'rate')",
-});
-
-const total = d.createElement("input").setAttribute({
-  required: "",
-  autocomplete: "off",
-  type: "number",
-  disabled: "",
-  value: 0,
+  oninput: "nin(this, 'taka')",
 });
 
 const error = d.createElement("div", "", { class: "error" });
@@ -69,9 +82,11 @@ success.append(succDiv, closeBtn2);
 const FormInput = {
   cementName: "সিমেন্ট ব্রান্ড নাম",
   date: "তারিখ",
-  quantity: "পরিমাণ",
-  rate: "দর",
-  total: "মোট",
+  shipName: "জাহাজের নাম",
+  boatMan: "মাঝির নাম",
+  boatManPhone: "মাঝির মোবাইল নাম্বার",
+  quantity: "মালের পরিমাণ",
+  taka: "টাকা",
 };
 
 for (let x in FormInput) {
@@ -95,7 +110,7 @@ const button2 = d.createElement("button", "মুছে ফেলুন", {
 
 form.append(success, error, button);
 main.append(h1, form);
-labourAdd.append(header, main, footer);
+shipAdd.append(header, main, footer);
 
 const cements = {
   shah: "শাহ্",
@@ -118,21 +133,20 @@ const addRequest = async () => {
   let month = new Date(date.getAttribute("value")[0]).getMonth() + 1;
   const idb = new db("com.infc.agency.habib-brother's");
   let presentMonthDatabase =
-    "labour" + cement + year + String(month).padStart(2, "0");
+    "ship" + cement + year + String(month).padStart(2, "0");
   let database = await idb.createDataBase(presentMonthDatabase, {
     keyPath: "date",
   });
+  let data = [date.getAttribute("value")[0]];
+  delete FormInput.date;
+  for (let x in FormInput) {
+    data.push(eval(x).getAttribute("value")[0]);
+  }
+  data.push(new Date().toString());
   idb
     .add({
       date: date.getAttribute("value")[0],
-      data: [
-        date.getAttribute("value")[0],
-        cementName.getAttribute("value")[0],
-        quantity.getAttribute("value")[0],
-        rate.getAttribute("value")[0],
-        total.getAttribute("value")[0],
-        new Date().toString(),
-      ],
+      data: data,
     })
     .then(async (res) => {
       if (res == "success") {
@@ -148,7 +162,7 @@ const addRequest = async () => {
         d.post(
           "https://script.google.com/macros/s/AKfycbymExR-OQWZdIEkT6AeLqj9mY92JzS_ucnntS2L/exec",
           {
-            type: 4,
+            type: 8,
             data: JSON.stringify({
               year: year,
               month: month,
@@ -188,20 +202,19 @@ const editRequest = async (date) => {
   let month = new Date(date).getMonth() + 1;
   const idb = new db("com.infc.agency.habib-brother's");
   let presentMonthDatabase =
-    "labour" + cement + year + String(month).padStart(2, "0");
+    "ship" + cement + year + String(month).padStart(2, "0");
   let database = await idb.createDataBase(presentMonthDatabase, {
     keyPath: "date",
   });
+  let data = [date];
+  delete FormInput.date;
+  for (let x in FormInput) {
+    data.push(eval(x).getAttribute("value")[0]);
+  }
+  data.push(new Date().toString());
   idb
     .put(date, {
-      data: [
-        date,
-        cementName.getAttribute("value")[0],
-        quantity.getAttribute("value")[0],
-        rate.getAttribute("value")[0],
-        total.getAttribute("value")[0],
-        new Date().toString(),
-      ],
+      data: data,
     })
     .then(async (res) => {
       if (res == "success") {
@@ -217,7 +230,7 @@ const editRequest = async (date) => {
         d.post(
           "https://script.google.com/macros/s/AKfycbymExR-OQWZdIEkT6AeLqj9mY92JzS_ucnntS2L/exec",
           {
-            type: 4,
+            type: 8,
             data: JSON.stringify({
               year: year,
               month: month,
@@ -257,7 +270,7 @@ const deleteRequest = async (date) => {
   let month = new Date(date).getMonth() + 1;
   const idb = new db("com.infc.agency.habib-brother's");
   let presentMonthDatabase =
-    "labour" + cement + year + String(month).padStart(2, "0");
+    "ship" + cement + year + String(month).padStart(2, "0");
   let database = await idb.createDataBase(presentMonthDatabase, {
     keyPath: "date",
   });
@@ -275,7 +288,7 @@ const deleteRequest = async (date) => {
         d.post(
           "https://script.google.com/macros/s/AKfycbymExR-OQWZdIEkT6AeLqj9mY92JzS_ucnntS2L/exec",
           {
-            type: 4,
+            type: 8,
             data: JSON.stringify({
               year: year,
               month: month,
@@ -297,20 +310,20 @@ const deleteRequest = async (date) => {
     });
 };
 
-labourAdd.onload = () => {
+shipAdd.onload = () => {
   if (!header.cement) {
-    window.location = "#/labour";
+    window.location = "#/ship";
     return;
   }
   header.onload();
   footer.onload();
   const { cement } = header;
-  header.page = cement + "laborAdd";
-  h1.setChildren(`${cements[cement]} সিমেন্ট লেভার`);
+  header.page = cement + "shipAdd";
+  h1.setChildren(`${cements[cement]} জাহাজ লেভার`);
   form.reset();
   cementName.changeAttribute("value", `${cements[cement]} সিমেন্ট`);
-  if (header.labourEdit) {
-    const { data } = header.labourEdit;
+  if (header.shipEdit) {
+    const { data } = header.shipEdit;
     date.changeAttribute("type", "text");
     date.changeAttribute(
       "value",
@@ -322,9 +335,12 @@ labourAdd.onload = () => {
     );
     button2.init();
     date.changeAttribute("disabled", "");
-    quantity.changeAttribute("value", data[2]);
-    rate.changeAttribute("value", data[3]);
-    total.changeAttribute("value", data[4]);
+    delete FormInput.date;
+    let i = 1;
+    for (let x in FormInput) {
+      eval(x).changeAttribute("value", data[i]);
+      i++;
+    }
     button.setChildren("ইডিট করুন");
     form.append(button2);
     document.querySelector(".submitBtn2").onclick = () => {
@@ -360,11 +376,6 @@ labourAdd.onload = () => {
 
   window.nin = (input, type) => {
     eval(type).changeAttributeN("value", input.value);
-    let value =
-      Number(quantity.getAttribute("value")[0]) *
-      Number(rate.getAttribute("value")[0]);
-    if (isNaN(value)) value = 0;
-    total.changeAttribute("value", value);
   };
 };
-export { labourAdd };
+export { shipAdd };
