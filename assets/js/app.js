@@ -29,6 +29,13 @@ if (window.localStorage["com.infc.agency.habib-brother's.login"]) {
 
 window.hashchange = () => {
   if (pages.page[window.location.hash.toString().replace("#/", "")]) {
+    if(window.location.hash.toString().replace("#/", "") == "logout"){
+      delete localStorage["com.infc.agency.habib-brother's.login"];
+      pages.root = "login";
+      pages.page = {};
+      d.render("root", login.init());
+      return ;
+    }
     d.render(
       "root",
       eval(

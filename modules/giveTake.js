@@ -123,6 +123,8 @@ giveTake.onload = async () => {
     truck._rendered = false;
     truck.insert(2, buttons);
     document.getElementById("root").innerHTML = truck._render();
+    header.onload();
+    footer.onload();
     let database = await idb.createDataBase(presentMonthDatabase, {
       keyPath: "date",
     });
@@ -180,6 +182,8 @@ giveTake.onload = async () => {
           truck._rendered = false;
           truck.insert(2, buttons);
           document.getElementById("root").innerHTML = truck._render();
+          header.onload();
+          footer.onload();
           const finalDataPast = [];
           for (let i = 0; i < past.length; i++) {
             past[i] = past[i].map((v) => v.substr(1));

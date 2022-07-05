@@ -131,8 +131,10 @@ body {
   height: 55px;
 }
 
-.menuBtn {
+.logout {
   margin-right: 15px;
+  cursor: pointer;
+  height: 55px;
 }
 
 /* footer style */

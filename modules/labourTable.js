@@ -169,6 +169,8 @@ labourTable.onload = async () => {
     labourTable._rendered = false;
     labourTable.insert(2, buttons);
     document.getElementById("root").innerHTML = labourTable._render();
+    header.onload();
+    footer.onload();
     let database = await idb.createDataBase(presentMonthDatabase, {
       keyPath: "date",
     });
@@ -230,6 +232,8 @@ labourTable.onload = async () => {
           labourTable.insert(2, buttons);
           document.getElementById("root").innerHTML =
             labourTable._render();
+          header.onload();
+          footer.onload();
           const finalDataPast = [];
           for (let i = 0; i < past.length; i++) {
             past[i] = past[i].map((v) => v.substr(1));

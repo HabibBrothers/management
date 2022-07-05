@@ -170,6 +170,8 @@ shipTable.onload = async () => {
     shipTable._rendered = false;
     shipTable.insert(2, buttons);
     document.getElementById("root").innerHTML = shipTable._render();
+    header.onload();
+    footer.onload();
     let database = await idb.createDataBase(presentMonthDatabase, {
       keyPath: "date",
     });
@@ -231,6 +233,8 @@ shipTable.onload = async () => {
           shipTable.insert(2, buttons);
           document.getElementById("root").innerHTML =
             shipTable._render();
+          header.onload();
+          footer.onload();
           const finalDataPast = [];
           for (let i = 0; i < past.length; i++) {
             past[i] = past[i].map((v) => v.substr(1));
