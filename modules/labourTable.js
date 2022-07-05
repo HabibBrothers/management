@@ -293,6 +293,7 @@ labourTable.onload = async () => {
     let dataBase =
       "labour" + cement + year + String(month).padStart(2, "0");
     let dataBaseData = await idb.exit(dataBase);
+    main.setChildren([h1, loading]);
     if (dataBaseData) {
       tableWrapper.init();
       startDate.changeAttributeN("value", start);
@@ -336,6 +337,57 @@ labourTable.onload = async () => {
           }),
         }
       ).catch((err) => console.log(err));
+    } else {
+      d.post(
+        "https://script.google.com/macros/s/AKfycbymExR-OQWZdIEkT6AeLqj9mY92JzS_ucnntS2L/exec",
+        {
+          type: 3,
+          data: JSON.stringify({
+            year: year,
+            month: month - 1,
+            cement: cement,
+          }),
+        }
+      ).then(async (res) => {
+        res = JSON.parse(JSON.parse(res).messege);
+        const { result, present } = res;
+        if (result) {
+          if (header.page == page) {
+            tableWrapper.init();
+            startDate.changeAttributeN("value", start);
+            endDate.changeAttributeN("value", end);
+            main.setChildren([h1, interval, tableWrapper]);
+            labourTable._rendered = false;
+            labourTable.insert(2, buttons);
+            document.getElementById("root").innerHTML =
+              labourTable._render();
+            const finalDataPresent = [];
+            for (let i = 0; i < present.length; i++) {
+              present[i] = present[i].map((v) => v.substr(1));
+              finalDataPresent.push({
+                date: present[i][0],
+                data: present[i],
+              });
+            }
+            let database = await idb.createDataBase(dataBase, {
+              keyPath: "date",
+            });
+            idb.add(finalDataPresent);
+
+            let data = await idb.getAllValues("data");
+            data = dataPrint(data, start, end);
+            for (let i = 0; i < data.length; i++) {
+              document.querySelector(`img[edit="${i}"]`).onclick =
+                () => {
+                  header.labourEdit = {
+                    data: data[i],
+                  };
+                  window.location = "#/labourAdd";
+                };
+            }
+          }
+        }
+      });
     }
   };
 };
