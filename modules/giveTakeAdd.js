@@ -3,17 +3,13 @@ import { header } from "./header.js";
 import { footer } from "./footer.js";
 import db from "../assets/js/IDB.js";
 
-const labourAdd = d.createElement("div");
+const giveTakeAdd = d.createElement("div");
 const main = d.createElement("main").setAttribute({ class: "main" });
 const h1 = d.createElement("h1");
 
 const form = d
   .createElement("form")
   .setAttribute({ class: "form", name: "form" });
-
-const cementName = d.createElement("input").setAttribute({
-  disabled: "",
-});
 
 const date = d.createElement("input").setAttribute({
   required: "",
@@ -22,26 +18,18 @@ const date = d.createElement("input").setAttribute({
   onchange: "nin(this, 'date')",
 });
 
-const quantity = d.createElement("input").setAttribute({
+const media = d.createElement("input").setAttribute({
   required: "",
   autocomplete: "off",
-  type: "number",
-  oninput: "nin(this, 'quantity')",
+  type: "text",
+  oninput: "nin(this, 'media')",
 });
 
-const rate = d.createElement("input").setAttribute({
+const amount = d.createElement("input").setAttribute({
   required: "",
   autocomplete: "off",
   type: "number",
-  oninput: "nin(this, 'rate')",
-});
-
-const total = d.createElement("input").setAttribute({
-  required: "",
-  autocomplete: "off",
-  type: "number",
-  disabled: "",
-  value: 0,
+  oninput: "nin(this, 'amount')",
 });
 
 const error = d.createElement("div", "", { class: "error" });
@@ -67,11 +55,9 @@ const closeBtn2 = `
 success.append(succDiv, closeBtn2);
 
 const FormInput = {
-  cementName: "সিমেন্ট ব্রান্ড নাম",
   date: "তারিখ",
-  quantity: "পরিমাণ",
-  rate: "দর",
-  total: "মোট",
+  media: "মাধ্যম",
+  amount: "পরিমাণ",
 };
 
 for (let x in FormInput) {
@@ -95,14 +81,7 @@ const button2 = d.createElement("button", "মুছে ফেলুন", {
 
 form.append(success, error, button);
 main.append(h1, form);
-labourAdd.append(header, main, footer);
-
-const cements = {
-  shah: "শাহ্",
-  scan: "স্কেন",
-  crown: "ক্রাউন্ট",
-  premier: "প্রিমিয়ার",
-};
+giveTakeAdd.append(header, main, footer);
 
 const addRequest = async () => {
   button
@@ -113,13 +92,12 @@ const addRequest = async () => {
     ]);
   error.changeAttribute("style", "display: none;");
   success.changeAttribute("style", "display: none;");
-  const { cement } = header;
   let year = new Date(date.getAttribute("value")[0]).getFullYear();
   let month = new Date(date.getAttribute("value")[0]).getMonth() + 1;
   const idb = new db("com.infc.agency.habib-brother's");
   let presentMonthDatabase =
-    "labour" + cement + year + String(month).padStart(2, "0");
-  header.page = cement + "laborAdd";
+    "giveTake" + cement + year + String(month).padStart(2, "0");
+  header.page = "giveTakeAdd";
   let dataBaseCon = await idb.exit(presentMonthDatabase);
   if (dataBaseCon) {
     let database = await idb.createDataBase(presentMonthDatabase, {
@@ -130,6 +108,7 @@ const addRequest = async () => {
     for (let x in FormInput) {
       data.push(eval(x).getAttribute("value")[0]);
     }
+    data.push("[]");
     data.push(new Date().toString());
     idb
       .add({
@@ -150,7 +129,7 @@ const addRequest = async () => {
           d.post(
             "https://script.google.com/macros/s/AKfycbymExR-OQWZdIEkT6AeLqj9mY92JzS_ucnntS2L/exec",
             {
-              type: 4,
+              type: 10,
               data: JSON.stringify({
                 year: year,
                 month: month,
@@ -178,11 +157,10 @@ const addRequest = async () => {
     d.post(
       "https://script.google.com/macros/s/AKfycbymExR-OQWZdIEkT6AeLqj9mY92JzS_ucnntS2L/exec",
       {
-        type: 3,
+        type: 9,
         data: JSON.stringify({
           year: year,
           month: month - 1,
-          cement: cement,
         }),
       }
     ).then(async (res) => {
@@ -206,6 +184,7 @@ const addRequest = async () => {
           for (let x in FormInput) {
             data.push(eval(x).getAttribute("value")[0]);
           }
+          data.push("[]");
           data.push(new Date().toString());
           idb
             .add([
@@ -229,11 +208,10 @@ const addRequest = async () => {
                 d.post(
                   "https://script.google.com/macros/s/AKfycbymExR-OQWZdIEkT6AeLqj9mY92JzS_ucnntS2L/exec",
                   {
-                    type: 4,
+                    type: 10,
                     data: JSON.stringify({
                       year: year,
                       month: month,
-                      cement: cement,
                       data: data,
                     }),
                   }
@@ -259,7 +237,7 @@ const addRequest = async () => {
   }
 };
 
-const editRequest = async (date) => {
+const editRequest = async (date, take) => {
   button
     .setChildren("ইডিট হচ্ছে...")
     .changeAttribute("disabled", "")
@@ -268,12 +246,11 @@ const editRequest = async (date) => {
     ]);
   error.changeAttribute("style", "display: none;");
   success.changeAttribute("style", "display: none;");
-  const { cement } = header;
   let year = new Date(date).getFullYear();
   let month = new Date(date).getMonth() + 1;
   const idb = new db("com.infc.agency.habib-brother's");
   let presentMonthDatabase =
-    "labour" + cement + year + String(month).padStart(2, "0");
+    "giveTake" + cement + year + String(month).padStart(2, "0");
   let database = await idb.createDataBase(presentMonthDatabase, {
     keyPath: "date",
   });
@@ -283,6 +260,7 @@ const editRequest = async (date) => {
     data.push(eval(x).getAttribute("value")[0]);
   }
   data.push(new Date().toString());
+  data.push(take);
   idb
     .put(date, {
       data: data,
@@ -301,11 +279,10 @@ const editRequest = async (date) => {
         d.post(
           "https://script.google.com/macros/s/AKfycbymExR-OQWZdIEkT6AeLqj9mY92JzS_ucnntS2L/exec",
           {
-            type: 4,
+            type: 10,
             data: JSON.stringify({
               year: year,
               month: month,
-              cement: cement,
               data: data,
             }),
           }
@@ -336,12 +313,11 @@ const deleteRequest = async (date) => {
     ]);
   error.changeAttribute("style", "display: none;");
   success.changeAttribute("style", "display: none;");
-  const { cement } = header;
   let year = new Date(date).getFullYear();
   let month = new Date(date).getMonth() + 1;
   const idb = new db("com.infc.agency.habib-brother's");
   let presentMonthDatabase =
-    "labour" + cement + year + String(month).padStart(2, "0");
+    "giveTake" + cement + year + String(month).padStart(2, "0");
   let database = await idb.createDataBase(presentMonthDatabase, {
     keyPath: "date",
   });
@@ -359,7 +335,7 @@ const deleteRequest = async (date) => {
         d.post(
           "https://script.google.com/macros/s/AKfycbymExR-OQWZdIEkT6AeLqj9mY92JzS_ucnntS2L/exec",
           {
-            type: 4,
+            type: 10,
             data: JSON.stringify({
               year: year,
               month: month,
@@ -381,20 +357,14 @@ const deleteRequest = async (date) => {
     });
 };
 
-labourAdd.onload = () => {
-  if (!header.cement) {
-    window.location = "#/labour";
-    return;
-  }
+giveTakeAdd.onload = () => {
   header.onload();
   footer.onload();
-  const { cement } = header;
-  header.page = cement + "laborAdd";
-  h1.setChildren(`${cements[cement]} সিমেন্ট লেভার`);
+  header.page = "giveTakeAdd";
+  h1.setChildren(`দেওয়া হিসাব`);
   form.reset();
-  cementName.changeAttribute("value", `${cements[cement]} সিমেন্ট`);
-  if (header.labourEdit) {
-    const { data } = header.labourEdit;
+  if (header.giveTakeEdit) {
+    const { data } = header.giveTakeEdit;
     date.changeAttribute("type", "text");
     date.changeAttribute(
       "value",
@@ -447,11 +417,6 @@ labourAdd.onload = () => {
 
   window.nin = (input, type) => {
     eval(type).changeAttributeN("value", input.value);
-    let value =
-      Number(quantity.getAttribute("value")[0]) *
-      Number(rate.getAttribute("value")[0]);
-    if (isNaN(value)) value = 0;
-    total.changeAttribute("value", value);
   };
 };
-export { labourAdd };
+export { giveTakeAdd };

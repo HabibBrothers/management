@@ -143,7 +143,7 @@ giveTake.onload = async () => {
   const page = "giveTake";
   delete header.giveTakeEdit;
   header.page = page;
-  h1.setChildren(`গাড়ি হিসাব`);
+  h1.setChildren(`দেওয়া নেওয়া হিসাব`);
   let year = new Date().getFullYear();
   let month = new Date().getMonth() + 1;
   const idb = new db("com.infc.agency.habib-brother's");

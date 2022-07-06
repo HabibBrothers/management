@@ -11,6 +11,7 @@ const pages = {
     shipTable: "shipTable",
     shipAdd: "shipAdd",
     giveTake: "giveTake",
+    giveTakeAdd: "giveTakeAdd",
   },
   page: {},
   root: "login",

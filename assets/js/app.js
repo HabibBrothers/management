@@ -11,6 +11,7 @@ import { ship } from "../../modules/ship.js";
 import { shipTable } from "../../modules/shipTable.js";
 import { shipAdd } from "../../modules/shipAdd.js";
 import { giveTake } from "../../modules/giveTake.js";
+import { giveTakeAdd } from "../../modules/giveTakeAdd.js";
 
 if (window.localStorage["com.infc.agency.habib-brother's.login"]) {
   pages.root = "home";
