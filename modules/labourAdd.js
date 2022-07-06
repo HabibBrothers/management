@@ -119,59 +119,146 @@ const addRequest = async () => {
   const idb = new db("com.infc.agency.habib-brother's");
   let presentMonthDatabase =
     "labour" + cement + year + String(month).padStart(2, "0");
-  let database = await idb.createDataBase(presentMonthDatabase, {
-    keyPath: "date",
-  });
-  idb
-    .add({
-      date: date.getAttribute("value")[0],
-      data: [
-        date.getAttribute("value")[0],
-        cementName.getAttribute("value")[0],
-        quantity.getAttribute("value")[0],
-        rate.getAttribute("value")[0],
-        total.getAttribute("value")[0],
-        new Date().toString(),
-      ],
-    })
-    .then(async (res) => {
-      if (res == "success") {
-        succDiv.setChildren("অসাধারণ! আপনি সফল হয়েছেন।");
-        success.changeAttribute("style", "display: flex");
-        button
-          .setChildren("যোগ করুন")
-          .removeAttribute("disabled", "style");
-        let data = await idb.getAllValues("data");
-        data = data.map((value) => {
-          return value.map((v) => "t" + v);
-        });
-        d.post(
-          "https://script.google.com/macros/s/AKfycbymExR-OQWZdIEkT6AeLqj9mY92JzS_ucnntS2L/exec",
-          {
-            type: 4,
-            data: JSON.stringify({
-              year: year,
-              month: month,
-              cement: cement,
-              data: data,
-            }),
-          }
-        ).catch((err) => console.log(err));
-      } else {
-        errDiv.setChildren("ওহ! সমস্যা হয়েছে।");
+
+  let dataBaseCon = await idb.exit(presentMonthDatabase);
+  if (dataBaseCon) {
+    let database = await idb.createDataBase(presentMonthDatabase, {
+      keyPath: "date",
+    });
+    idb
+      .add({
+        date: date.getAttribute("value")[0],
+        data: [
+          date.getAttribute("value")[0],
+          cementName.getAttribute("value")[0],
+          quantity.getAttribute("value")[0],
+          rate.getAttribute("value")[0],
+          total.getAttribute("value")[0],
+          new Date().toString(),
+        ],
+      })
+      .then(async (res) => {
+        if (res == "success") {
+          succDiv.setChildren("অসাধারণ! আপনি সফল হয়েছেন।");
+          success.changeAttribute("style", "display: flex");
+          button
+            .setChildren("যোগ করুন")
+            .removeAttribute("disabled", "style");
+          let data = await idb.getAllValues("data");
+          data = data.map((value) => {
+            return value.map((v) => "t" + v);
+          });
+          d.post(
+            "https://script.google.com/macros/s/AKfycbymExR-OQWZdIEkT6AeLqj9mY92JzS_ucnntS2L/exec",
+            {
+              type: 4,
+              data: JSON.stringify({
+                year: year,
+                month: month,
+                cement: cement,
+                data: data,
+              }),
+            }
+          ).catch((err) => console.log(err));
+        } else {
+          errDiv.setChildren("ওহ! সমস্যা হয়েছে।");
+          error.changeAttribute("style", "display: flex");
+          button
+            .setChildren("যোগ করুন")
+            .removeAttribute("disabled", "style");
+        }
+      })
+      .catch((err) => {
+        errDiv.setChildren("ওহ! সমস্যা হয়েছে। তারিখ চেক করুন।");
         error.changeAttribute("style", "display: flex");
         button
           .setChildren("যোগ করুন")
           .removeAttribute("disabled", "style");
+      });
+  } else {
+    d.post(
+      "https://script.google.com/macros/s/AKfycbymExR-OQWZdIEkT6AeLqj9mY92JzS_ucnntS2L/exec",
+      {
+        type: 3,
+        data: JSON.stringify({
+          year: year,
+          month: month - 1,
+          cement: cement,
+        }),
       }
-    })
-    .catch((err) => {
-      errDiv.setChildren("ওহ! সমস্যা হয়েছে। তারিখ চেক করুন।");
-      error.changeAttribute("style", "display: flex");
-      button
-        .setChildren("যোগ করুন")
-        .removeAttribute("disabled", "style");
+    ).then(async (res) => {
+      res = JSON.parse(JSON.parse(res).messege);
+      const { result, present } = res;
+      if (result) {
+        if (header.page == page) {
+          const finalDataPresent = [];
+          for (let i = 0; i < present.length; i++) {
+            present[i] = present[i].map((v) => v.substr(1));
+            finalDataPresent.push({
+              date: present[i][0],
+              data: present[i],
+            });
+          }
+          let database = await idb.createDataBase(dataBase, {
+            keyPath: "date",
+          });
+          idb
+            .add([
+              ...finalDataPresent,
+              {
+                date: date.getAttribute("value")[0],
+                data: [
+                  date.getAttribute("value")[0],
+                  cementName.getAttribute("value")[0],
+                  quantity.getAttribute("value")[0],
+                  rate.getAttribute("value")[0],
+                  total.getAttribute("value")[0],
+                  new Date().toString(),
+                ],
+              },
+            ])
+            .then(async (res) => {
+              if (res == "success") {
+                succDiv.setChildren("অসাধারণ! আপনি সফল হয়েছেন।");
+                success.changeAttribute("style", "display: flex");
+                button
+                  .setChildren("যোগ করুন")
+                  .removeAttribute("disabled", "style");
+                let data = await idb.getAllValues("data");
+                data = data.map((value) => {
+                  return value.map((v) => "t" + v);
+                });
+                d.post(
+                  "https://script.google.com/macros/s/AKfycbymExR-OQWZdIEkT6AeLqj9mY92JzS_ucnntS2L/exec",
+                  {
+                    type: 4,
+                    data: JSON.stringify({
+                      year: year,
+                      month: month,
+                      cement: cement,
+                      data: data,
+                    }),
+                  }
+                ).catch((err) => console.log(err));
+              } else {
+                errDiv.setChildren("ওহ! সমস্যা হয়েছে।");
+                error.changeAttribute("style", "display: flex");
+                button
+                  .setChildren("যোগ করুন")
+                  .removeAttribute("disabled", "style");
+              }
+            })
+            .catch((err) => {
+              errDiv.setChildren("ওহ! সমস্যা হয়েছে। তারিখ চেক করুন।");
+              error.changeAttribute("style", "display: flex");
+              button
+                .setChildren("যোগ করুন")
+                .removeAttribute("disabled", "style");
+            });
+        }
+      }
     });
+  }
 };
 
 const editRequest = async (date) => {
