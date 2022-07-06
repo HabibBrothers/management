@@ -27,14 +27,19 @@ if (window.localStorage["com.infc.agency.habib-brother's.login"]) {
   }
 } else d.render("root", login);
 
-window.hashchange = () => {
+window.hashchange = async () => {
   if (pages.page[window.location.hash.toString().replace("#/", "")]) {
-    if(window.location.hash.toString().replace("#/", "") == "logout"){
+    if (
+      window.location.hash.toString().replace("#/", "") == "logout"
+    ) {
       delete localStorage["com.infc.agency.habib-brother's.login"];
       pages.root = "login";
       pages.page = {};
+      let data = await window.indexedDB.deleteDatabase(
+        "com.infc.agency.habib-brother's"
+      );
       d.render("root", login.init());
-      return ;
+      return;
     }
     d.render(
       "root",
