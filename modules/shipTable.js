@@ -16,12 +16,12 @@ const interval = d
 
 const startDate = d.createElement("input").setAttribute({
   type: "date",
-  onchange: "labour(this, '1')",
+  onchange: "intervalDate(this, '1')",
 });
 
 const endDate = d.createElement("input").setAttribute({
   type: "date",
-  onchange: "labour(this, '2')",
+  onchange: "intervalDate(this, '2')",
 });
 
 interval.append(startDate, endDate);
@@ -168,7 +168,7 @@ shipTable.onload = async () => {
     });
     try {
       let data = await idb.getAllValues("data");
-      dataPrint(data);
+      data = dataPrint(data, start, end);
       for (let i = 0; i < data.length; i++) {
         document.querySelector(`img[edit="${i}"]`).onclick = () => {
           header.shipEdit = {
@@ -251,7 +251,7 @@ shipTable.onload = async () => {
           });
           idb.add(finalDataPresent);
           let data = await idb.getAllValues("data");
-          dataPrint(data);
+          data = dataPrint(data, start, end);
           for (let i = 0; i < data.length; i++) {
             document.querySelector(`img[edit="${i}"]`).onclick =
               () => {
@@ -266,17 +266,120 @@ shipTable.onload = async () => {
     });
   }
 
-  window.labour = (input, type) => {
+  window.intervalDate = async (input, type) => {
+    let start, end;
+    const { cement } = header;
+    const page = cement + "shipTable";
     if (type == 1) {
-      const { start, end } = getInterval(input.value);
+      let data = getInterval(input.value);
+      (start = data.start), (end = data.end);
       startDate.changeAttribute("max", getInterval().end);
-      // document.querySelector(
-      //   `input[node="${startDate._node}"]`
-      // ).value = start;
-      document.querySelector(`input[node="${endDate._node}"]`).value =
-        end;
       endDate.changeAttribute("max", end);
       endDate.changeAttribute("min", start);
+    } else {
+      start = getInterval(startDate.getAttribute("value")[0]).start;
+      end = getInterval(input.value).start;
+    }
+    let year = new Date(start).getFullYear();
+    let month = new Date(start).getMonth() + 1;
+    const idb = new db("com.infc.agency.habib-brother's");
+    let dataBase =
+      "ship" + cement + year + String(month).padStart(2, "0");
+    let dataBaseData = await idb.exit(dataBase);
+    main.setChildren([h1, loading]);
+    if (dataBaseData) {
+      tableWrapper.init();
+      startDate.changeAttributeN("value", start);
+      endDate.changeAttributeN("value", end);
+      main.setChildren([h1, interval, tableWrapper]);
+      shipTable._rendered = false;
+      shipTable.insert(2, buttons);
+      document.getElementById("root").innerHTML = shipTable._render();
+      try {
+        let database = await idb.createDataBase(dataBase, {
+          keyPath: "date",
+        });
+        let data = await idb.getAllValues("data");
+        data = dataPrint(data, start, end);
+        for (let i = 0; i < data.length; i++) {
+          document.querySelector(`img[edit="${i}"]`).onclick = () => {
+            header.shipEdit = {
+              data: data[i],
+            };
+            window.location = "#/shipAdd";
+          };
+        }
+      } catch (err) {
+        console.log(err);
+      }
+      let data = await idb.getAllValues("data");
+      data = data.map((value) => {
+        value[0] = "d" + value[0];
+        return value;
+      });
+      d.post(
+        "https://script.google.com/macros/s/AKfycbymExR-OQWZdIEkT6AeLqj9mY92JzS_ucnntS2L/exec",
+        {
+          type: 8,
+          data: JSON.stringify({
+            year: year,
+            month: month,
+            cement: cement,
+            data: data,
+          }),
+        }
+      ).catch((err) => console.log(err));
+    } else {
+      d.post(
+        "https://script.google.com/macros/s/AKfycbymExR-OQWZdIEkT6AeLqj9mY92JzS_ucnntS2L/exec",
+        {
+          type: 7,
+          data: JSON.stringify({
+            year: year,
+            month: month - 1,
+            cement: cement,
+          }),
+        }
+      ).then(async (res) => {
+        res = JSON.parse(JSON.parse(res).messege);
+        const { result, present } = res;
+        if (result) {
+          if (header.page == page) {
+            tableWrapper.init();
+            startDate.changeAttributeN("value", start);
+            endDate.changeAttributeN("value", end);
+            main.setChildren([h1, interval, tableWrapper]);
+            shipTable._rendered = false;
+            shipTable.insert(2, buttons);
+            document.getElementById("root").innerHTML =
+              shipTable._render();
+            const finalDataPresent = [];
+            for (let i = 0; i < present.length; i++) {
+              present[i] = present[i].map((v) => v.substr(1));
+              finalDataPresent.push({
+                date: present[i][0],
+                data: present[i],
+              });
+            }
+            let database = await idb.createDataBase(dataBase, {
+              keyPath: "date",
+            });
+            idb.add(finalDataPresent);
+
+            let data = await idb.getAllValues("data");
+            data = dataPrint(data, start, end);
+            for (let i = 0; i < data.length; i++) {
+              document.querySelector(`img[edit="${i}"]`).onclick =
+                () => {
+                  header.shipEdit = {
+                    data: data[i],
+                  };
+                  window.location = "#/shipAdd";
+                };
+            }
+          }
+        }
+      });
     }
   };
 };
@@ -287,10 +390,16 @@ function getInterval(date = "") {
   let startDate = 1;
   let endDate = 15;
   if (date) {
-    if (new Date(date).getDate() > 15) {
-      startDate = 16;
-    }
-    if (startDate == 16) {
+    startDate = new Date(date).getDate();
+    if (
+      startDate > new Date().getDate() &&
+      new Date(date).getMonth() == new Date().getMonth()
+    )
+      startDate = new Date().getDate();
+    // if (new Date(date).getDate() > 15) {
+    //   startDate = 16;
+    // }
+    if (startDate >= 16) {
       endDate = monthDays[new Date(date).getMonth()];
       if (new Date(date).getFullYear() / 4 == 0 && endDate == 28)
         endDate = 29;
@@ -301,6 +410,11 @@ function getInterval(date = "") {
         endDate = new Date().getDate();
       }
     }
+    if (
+      endDate > new Date().getDate() &&
+      new Date(date).getMonth() == new Date().getMonth()
+    )
+      endDate = new Date().getDate();
     result.start =
       new Date(date).getFullYear() +
       "-" +

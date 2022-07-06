@@ -16,12 +16,12 @@ const interval = d
 
 const startDate = d.createElement("input").setAttribute({
   type: "date",
-  onchange: "labour(this, '1')",
+  onchange: "intervalDate(this, '1')",
 });
 
 const endDate = d.createElement("input").setAttribute({
   type: "date",
-  onchange: "labour(this, '2')",
+  onchange: "intervalDate(this, '2')",
 });
 
 interval.append(startDate, endDate);
@@ -275,8 +275,10 @@ labourTable.onload = async () => {
     });
   }
 
-  window.labour = async (input, type) => {
+  window.intervalDate = async (input, type) => {
     let start, end;
+    const { cement } = header;
+    const page = cement + "laborTable";
     if (type == 1) {
       let data = getInterval(input.value);
       (start = data.start), (end = data.end);
