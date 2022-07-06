@@ -140,17 +140,16 @@ const addRequest = async () => {
     let database = await idb.createDataBase(presentMonthDatabase, {
       keyPath: "date",
     });
+    let data = [date.getAttribute("value")[0]];
+    delete FormInput.date;
+    for (let x in FormInput) {
+      data.push(eval(x).getAttribute("value")[0]);
+    }
+    data.push(new Date().toString());
     idb
       .add({
         date: date.getAttribute("value")[0],
-        data: [
-          date.getAttribute("value")[0],
-          cementName.getAttribute("value")[0],
-          quantity.getAttribute("value")[0],
-          rate.getAttribute("value")[0],
-          total.getAttribute("value")[0],
-          new Date().toString(),
-        ],
+        data: data,
       })
       .then(async (res) => {
         if (res == "success") {
@@ -217,19 +216,18 @@ const addRequest = async () => {
           let database = await idb.createDataBase(dataBase, {
             keyPath: "date",
           });
+          let data = [date.getAttribute("value")[0]];
+          delete FormInput.date;
+          for (let x in FormInput) {
+            data.push(eval(x).getAttribute("value")[0]);
+          }
+          data.push(new Date().toString());
           idb
             .add([
               ...finalDataPresent,
               {
                 date: date.getAttribute("value")[0],
-                data: [
-                  date.getAttribute("value")[0],
-                  cementName.getAttribute("value")[0],
-                  quantity.getAttribute("value")[0],
-                  rate.getAttribute("value")[0],
-                  total.getAttribute("value")[0],
-                  new Date().toString(),
-                ],
+                data: data,
               },
             ])
             .then(async (res) => {

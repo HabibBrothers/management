@@ -310,8 +310,7 @@ truck.onload = async () => {
       }
       let data = await idb.getAllValues("data");
       data = data.map((value) => {
-        value[0] = "d" + value[0];
-        return value;
+        return value.map((v) => "t" + v);
       });
       d.post(
         "https://script.google.com/macros/s/AKfycbymExR-OQWZdIEkT6AeLqj9mY92JzS_ucnntS2L/exec",
