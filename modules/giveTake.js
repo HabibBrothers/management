@@ -9,7 +9,7 @@ const giveTake = d.createElement("div");
 const main = d
   .createElement("main")
   .setAttribute({ class: ["main", "table"] });
-const h1 = d.createElement("h1", "দেওয়া নেওয়া হিসাব");
+const h1 = d.createElement("h1");
 
 const interval = d
   .createElement("div")
@@ -17,12 +17,12 @@ const interval = d
 
 const startDate = d.createElement("input").setAttribute({
   type: "date",
-  onchange: "labour(this, '1')",
+  onchange: "intervalDate(this, '1')",
 });
 
 const endDate = d.createElement("input").setAttribute({
   type: "date",
-  onchange: "labour(this, '2')",
+  onchange: "intervalDate(this, '2')",
 });
 
 interval.append(startDate, endDate);
@@ -33,7 +33,14 @@ const tableWrapper = d
 const table = d.createElement("table");
 const thead = d.createElement("thead");
 
-const titles = ["তারিখ", "মাধ্যম", "দেওয়া", "নেওয়া", "বিস্তারিত"];
+const titles = [
+  "তারিখ",
+  "মাধ্যম",
+  "দেওয়া",
+  "নেওয়া",
+  "আপডেট",
+  "বিস্তারিত",
+];
 
 const theadTr = d.createElement("tr");
 for (let x of titles) {
@@ -56,10 +63,20 @@ const enToBn = (en) => {
   }
   return en;
 };
-const dataPrint = (data) => {
+const dataPrint = (data, start, end) => {
   data.sort((a, b) => {
     return new Date(b[0]).getTime() - new Date(a[0]).getTime();
   });
+  if (start && end) {
+    data = data.filter((v) => {
+      // console.log(new Date(v[0]), new Date(start), new Date(end));
+      return (
+        new Date(v[0]).getTime() >= new Date(start).getTime() &&
+        new Date(v[0]).getTime() <= new Date(end).getTime()
+      );
+    });
+    if (!data.length) data = [];
+  }
   for (let i = 0; i < data.length; i++) {
     const tr = d.createElement("tr");
     let iniDate = data[i][0];
@@ -78,6 +95,13 @@ const dataPrint = (data) => {
         "td",
         d.createElement("img").setAttribute(
           {
+            src: "./assets/img/view.svg",
+            view: i,
+          },
+          { style: "padding: 0;" }
+        ),
+        d.createElement("img").setAttribute(
+          {
             src: "./assets/img/edit.svg",
             edit: i,
           },
@@ -87,12 +111,29 @@ const dataPrint = (data) => {
     );
     tbody.append(tr);
   }
+  return data;
 };
 
 table.append(thead, tbody);
 tableWrapper.append(table);
 
-main.append(h1, tableWrapper);
+main.append(h1, loading);
+
+const buttons = d.createElement(
+  "div",
+  [
+    d.createElement(
+      "svg",
+      `<polygon points="455,212.5 242.5,212.5 242.5,0 212.5,0 212.5,212.5 0,212.5 0,242.5 212.5,242.5 212.5,455 242.5,455 242.5,242.5 
+  455,242.5 "/>`,
+      {
+        viewBox: "0 0 455 455",
+        onclick: "window.location='#/truckAdd'",
+      }
+    ),
+  ],
+  { class: "buttons" }
+);
 
 giveTake.append(header, main, footer);
 
@@ -100,8 +141,9 @@ giveTake.onload = async () => {
   header.onload();
   footer.onload();
   const page = "giveTake";
-  delete header.giveEdit;
+  delete header.giveTakeEdit;
   header.page = page;
+  h1.setChildren(`গাড়ি হিসাব`);
   let year = new Date().getFullYear();
   let month = new Date().getMonth() + 1;
   const idb = new db("com.infc.agency.habib-brother's");
@@ -120,9 +162,9 @@ giveTake.onload = async () => {
     endDate.changeAttribute("max", end);
     endDate.changeAttribute("min", start);
     main.setChildren([h1, interval, tableWrapper]);
-    truck._rendered = false;
-    truck.insert(2, buttons);
-    document.getElementById("root").innerHTML = truck._render();
+    giveTake._rendered = false;
+    giveTake.insert(2, buttons);
+    document.getElementById("root").innerHTML = giveTake._render();
     header.onload();
     footer.onload();
     let database = await idb.createDataBase(presentMonthDatabase, {
@@ -130,13 +172,13 @@ giveTake.onload = async () => {
     });
     try {
       let data = await idb.getAllValues("data");
-      dataPrint(data);
+      data = dataPrint(data, start, end);
       for (let i = 0; i < data.length; i++) {
         document.querySelector(`img[edit="${i}"]`).onclick = () => {
-          header.truckEdit = {
+          header.giveTakeEdit = {
             data: data[i],
           };
-          window.location = "#/truckAdd";
+          window.location = "#/giveTakeAdd";
         };
       }
     } catch (err) {
@@ -179,9 +221,10 @@ giveTake.onload = async () => {
           endDate.changeAttribute("max", end);
           endDate.changeAttribute("min", start);
           main.setChildren([h1, interval, tableWrapper]);
-          truck._rendered = false;
-          truck.insert(2, buttons);
-          document.getElementById("root").innerHTML = truck._render();
+          giveTake._rendered = false;
+          giveTake.insert(2, buttons);
+          document.getElementById("root").innerHTML =
+            giveTake._render();
           header.onload();
           footer.onload();
           const finalDataPast = [];
@@ -209,14 +252,14 @@ giveTake.onload = async () => {
           });
           idb.add(finalDataPresent);
           let data = await idb.getAllValues("data");
-          dataPrint(data);
+          data = dataPrint(data, start, end);
           for (let i = 0; i < data.length; i++) {
             document.querySelector(`img[edit="${i}"]`).onclick =
               () => {
-                header.labourEdit = {
+                header.giveTakeEdit = {
                   data: data[i],
                 };
-                window.location = "#/truckAdd";
+                window.location = "#/giveTakeAdd";
               };
           }
         }
@@ -224,17 +267,115 @@ giveTake.onload = async () => {
     });
   }
 
-  window.labour = (input, type) => {
+  window.intervalDate = async (input, type) => {
+    let start, end;
+    const page = "giveTake";
     if (type == 1) {
-      const { start, end } = getInterval(input.value);
+      let data = getInterval(input.value);
+      (start = data.start), (end = data.end);
       startDate.changeAttribute("max", getInterval().end);
-      // document.querySelector(
-      //   `input[node="${startDate._node}"]`
-      // ).value = start;
-      document.querySelector(`input[node="${endDate._node}"]`).value =
-        end;
       endDate.changeAttribute("max", end);
       endDate.changeAttribute("min", start);
+    } else {
+      start = getInterval(startDate.getAttribute("value")[0]).start;
+      end = getInterval(input.value).start;
+    }
+    let year = new Date(start).getFullYear();
+    let month = new Date(start).getMonth() + 1;
+    const idb = new db("com.infc.agency.habib-brother's");
+    let dataBase = "giveTake" + year + String(month).padStart(2, "0");
+    let dataBaseData = await idb.exit(dataBase);
+    main.setChildren([h1, loading]);
+    if (dataBaseData) {
+      tableWrapper.init();
+      startDate.changeAttributeN("value", start);
+      endDate.changeAttributeN("value", end);
+      main.setChildren([h1, interval, tableWrapper]);
+      giveTake._rendered = false;
+      giveTake.insert(2, buttons);
+      document.getElementById("root").innerHTML = giveTake._render();
+      try {
+        let database = await idb.createDataBase(dataBase, {
+          keyPath: "date",
+        });
+        let data = await idb.getAllValues("data");
+        data = dataPrint(data, start, end);
+        for (let i = 0; i < data.length; i++) {
+          document.querySelector(`img[edit="${i}"]`).onclick = () => {
+            header.giveTakeEdit = {
+              data: data[i],
+            };
+            window.location = "#/giveTakeAdd";
+          };
+        }
+      } catch (err) {
+        console.log(err);
+      }
+      let data = await idb.getAllValues("data");
+      data = data.map((value) => {
+        return value.map((v) => "t" + v);
+      });
+      d.post(
+        "https://script.google.com/macros/s/AKfycbymExR-OQWZdIEkT6AeLqj9mY92JzS_ucnntS2L/exec",
+        {
+          type: 10,
+          data: JSON.stringify({
+            year: year,
+            month: month,
+            data: data,
+          }),
+        }
+      ).catch((err) => console.log(err));
+    } else {
+      d.post(
+        "https://script.google.com/macros/s/AKfycbymExR-OQWZdIEkT6AeLqj9mY92JzS_ucnntS2L/exec",
+        {
+          type: 9,
+          data: JSON.stringify({
+            year: year,
+            month: month - 1,
+          }),
+        }
+      ).then(async (res) => {
+        res = JSON.parse(JSON.parse(res).messege);
+        const { result, present } = res;
+        if (result) {
+          if (header.page == page) {
+            tableWrapper.init();
+            startDate.changeAttributeN("value", start);
+            endDate.changeAttributeN("value", end);
+            main.setChildren([h1, interval, tableWrapper]);
+            giveTake._rendered = false;
+            giveTake.insert(2, buttons);
+            document.getElementById("root").innerHTML =
+              giveTake._render();
+            const finalDataPresent = [];
+            for (let i = 0; i < present.length; i++) {
+              present[i] = present[i].map((v) => v.substr(1));
+              finalDataPresent.push({
+                date: present[i][0],
+                data: present[i],
+              });
+            }
+            let database = await idb.createDataBase(dataBase, {
+              keyPath: "date",
+            });
+            idb.add(finalDataPresent);
+
+            let data = await idb.getAllValues("data");
+            data = dataPrint(data, start, end);
+            for (let i = 0; i < data.length; i++) {
+              document.querySelector(`img[edit="${i}"]`).onclick =
+                () => {
+                  header.giveTakeEdit = {
+                    data: data[i],
+                  };
+                  window.location = "#/giveTakeAdd";
+                };
+            }
+          }
+        }
+      });
     }
   };
 };
@@ -245,10 +386,16 @@ function getInterval(date = "") {
   let startDate = 1;
   let endDate = 15;
   if (date) {
-    if (new Date(date).getDate() > 15) {
-      startDate = 16;
-    }
-    if (startDate == 16) {
+    startDate = new Date(date).getDate();
+    if (
+      startDate > new Date().getDate() &&
+      new Date(date).getMonth() == new Date().getMonth()
+    )
+      startDate = new Date().getDate();
+    // if (new Date(date).getDate() > 15) {
+    //   startDate = 16;
+    // }
+    if (startDate >= 16) {
       endDate = monthDays[new Date(date).getMonth()];
       if (new Date(date).getFullYear() / 4 == 0 && endDate == 28)
         endDate = 29;
@@ -259,6 +406,11 @@ function getInterval(date = "") {
         endDate = new Date().getDate();
       }
     }
+    if (
+      endDate > new Date().getDate() &&
+      new Date(date).getMonth() == new Date().getMonth()
+    )
+      endDate = new Date().getDate();
     result.start =
       new Date(date).getFullYear() +
       "-" +

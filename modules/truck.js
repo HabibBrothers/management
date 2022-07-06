@@ -266,7 +266,7 @@ truck.onload = async () => {
 
   window.intervalDate = async (input, type) => {
     let start, end;
-    const page = cement + "truck";
+    const page = "truck";
     if (type == 1) {
       let data = getInterval(input.value);
       (start = data.start), (end = data.end);
