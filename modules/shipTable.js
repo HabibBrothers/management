@@ -61,10 +61,20 @@ const enToBn = (en) => {
   }
   return en;
 };
-const dataPrint = (data) => {
+const dataPrint = (data, start, end) => {
   data.sort((a, b) => {
     return new Date(b[0]).getTime() - new Date(a[0]).getTime();
   });
+  if (start && end) {
+    data = data.filter((v) => {
+      // console.log(new Date(v[0]), new Date(start), new Date(end));
+      return (
+        new Date(v[0]).getTime() >= new Date(start).getTime() &&
+        new Date(v[0]).getTime() <= new Date(end).getTime()
+      );
+    });
+    if (!data.length) data = [];
+  }
   for (let i = 0; i < data.length; i++) {
     const tr = d.createElement("tr");
     let iniDate = data[i][0];
@@ -92,6 +102,7 @@ const dataPrint = (data) => {
     );
     tbody.append(tr);
   }
+  return data;
 };
 
 table.append(thead, tbody);
