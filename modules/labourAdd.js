@@ -119,7 +119,7 @@ const addRequest = async () => {
   const idb = new db("com.infc.agency.habib-brother's");
   let presentMonthDatabase =
     "labour" + cement + year + String(month).padStart(2, "0");
-
+  header.page = cement + "laborAdd";
   let dataBaseCon = await idb.exit(presentMonthDatabase);
   if (dataBaseCon) {
     let database = await idb.createDataBase(presentMonthDatabase, {
