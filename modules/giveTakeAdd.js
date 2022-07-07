@@ -96,14 +96,15 @@ const addRequest = async () => {
   let month = new Date(date.getAttribute("value")[0]).getMonth() + 1;
   const idb = new db("com.infc.agency.habib-brother's");
   let presentMonthDatabase =
-    "giveTake" + cement + year + String(month).padStart(2, "0");
+    "giveTake" + year + String(month).padStart(2, "0");
   header.page = "giveTakeAdd";
   let dataBaseCon = await idb.exit(presentMonthDatabase);
   if (dataBaseCon) {
     let database = await idb.createDataBase(presentMonthDatabase, {
-      keyPath: "date",
+      keyPath: "id",
     });
-    let data = [date.getAttribute("value")[0]];
+    let id = new Date().getTime();
+    let data = [id, date.getAttribute("value")[0]];
     delete FormInput.date;
     for (let x in FormInput) {
       data.push(eval(x).getAttribute("value")[0]);
@@ -112,7 +113,7 @@ const addRequest = async () => {
     data.push(new Date().toString());
     idb
       .add({
-        date: date.getAttribute("value")[0],
+        id: id,
         data: data,
       })
       .then(async (res) => {
@@ -133,7 +134,6 @@ const addRequest = async () => {
               data: JSON.stringify({
                 year: year,
                 month: month,
-                cement: cement,
                 data: data,
               }),
             }
@@ -147,7 +147,7 @@ const addRequest = async () => {
         }
       })
       .catch((err) => {
-        errDiv.setChildren("ওহ! সমস্যা হয়েছে। তারিখ চেক করুন।");
+        errDiv.setChildren("ওহ! সমস্যা হয়েছে।");
         error.changeAttribute("style", "display: flex");
         button
           .setChildren("যোগ করুন")
@@ -177,9 +177,10 @@ const addRequest = async () => {
             });
           }
           let database = await idb.createDataBase(dataBase, {
-            keyPath: "date",
+            keyPath: "id",
           });
-          let data = [date.getAttribute("value")[0]];
+          let id = new Date().getTime();
+          let data = [id, date.getAttribute("value")[0]];
           delete FormInput.date;
           for (let x in FormInput) {
             data.push(eval(x).getAttribute("value")[0]);
@@ -190,7 +191,7 @@ const addRequest = async () => {
             .add([
               ...finalDataPresent,
               {
-                date: date.getAttribute("value")[0],
+                id: id,
                 data: data,
               },
             ])
@@ -237,7 +238,7 @@ const addRequest = async () => {
   }
 };
 
-const editRequest = async (date, take) => {
+const editRequest = async (id, date, take) => {
   button
     .setChildren("ইডিট হচ্ছে...")
     .changeAttribute("disabled", "")
@@ -250,19 +251,19 @@ const editRequest = async (date, take) => {
   let month = new Date(date).getMonth() + 1;
   const idb = new db("com.infc.agency.habib-brother's");
   let presentMonthDatabase =
-    "giveTake" + cement + year + String(month).padStart(2, "0");
+    "giveTake" + year + String(month).padStart(2, "0");
   let database = await idb.createDataBase(presentMonthDatabase, {
-    keyPath: "date",
+    keyPath: "id",
   });
-  let data = [date];
+  let data = [id, date];
   delete FormInput.date;
   for (let x in FormInput) {
     data.push(eval(x).getAttribute("value")[0]);
   }
-  data.push(new Date().toString());
   data.push(take);
+  data.push(new Date().toString());
   idb
-    .put(date, {
+    .put(id, {
       data: data,
     })
     .then(async (res) => {
@@ -304,7 +305,7 @@ const editRequest = async (date, take) => {
     });
 };
 
-const deleteRequest = async (date) => {
+const deleteRequest = async (id, date) => {
   button2
     .setChildren("মুছে ফেলা হচ্ছে...")
     .changeAttribute("disabled", "")
@@ -317,12 +318,12 @@ const deleteRequest = async (date) => {
   let month = new Date(date).getMonth() + 1;
   const idb = new db("com.infc.agency.habib-brother's");
   let presentMonthDatabase =
-    "giveTake" + cement + year + String(month).padStart(2, "0");
+    "giveTake" + year + String(month).padStart(2, "0");
   let database = await idb.createDataBase(presentMonthDatabase, {
-    keyPath: "date",
+    keyPath: "id",
   });
   idb
-    .remove(date)
+    .remove(id)
     .then(async (res) => {
       if (res == "success") {
         succDiv.setChildren("অসাধারণ! আপনি সফল হয়েছেন।");
@@ -368,16 +369,16 @@ giveTakeAdd.onload = () => {
     date.changeAttribute("type", "text");
     date.changeAttribute(
       "value",
-      String(new Date(data[0]).getDate()).padStart(2, "0") +
+      String(new Date(data[1]).getDate()).padStart(2, "0") +
         "/" +
-        String(new Date(data[0]).getMonth() + 1).padStart(2, "0") +
+        String(new Date(data[1]).getMonth() + 1).padStart(2, "0") +
         "/" +
-        new Date(data[0]).getFullYear()
+        new Date(data[1]).getFullYear()
     );
     button2.init();
     date.changeAttribute("disabled", "");
     delete FormInput.date;
-    let i = 1;
+    let i = 2;
     for (let x in FormInput) {
       eval(x).changeAttribute("value", data[i]);
       i++;
@@ -386,11 +387,11 @@ giveTakeAdd.onload = () => {
     form.append(button2);
     document.querySelector(".submitBtn2").onclick = () => {
       form.removeElement(button);
-      deleteRequest(data[0]);
+      deleteRequest(data[0], data[1]);
     };
     document.forms["form"].onsubmit = (e) => {
       e.preventDefault();
-      editRequest(data[0]);
+      editRequest(data[0], data[1], data[4]);
     };
   } else {
     date.changeAttribute(

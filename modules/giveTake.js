@@ -65,45 +65,54 @@ const enToBn = (en) => {
 };
 const dataPrint = (data, start, end) => {
   data.sort((a, b) => {
-    return new Date(b[0]).getTime() - new Date(a[0]).getTime();
+    return new Date(b[1]).getTime() - new Date(a[1]).getTime();
   });
   if (start && end) {
     data = data.filter((v) => {
       // console.log(new Date(v[0]), new Date(start), new Date(end));
       return (
-        new Date(v[0]).getTime() >= new Date(start).getTime() &&
-        new Date(v[0]).getTime() <= new Date(end).getTime()
+        new Date(v[1]).getTime() >= new Date(start).getTime() &&
+        new Date(v[1]).getTime() <= new Date(end).getTime()
       );
     });
     if (!data.length) data = [];
   }
   for (let i = 0; i < data.length; i++) {
     const tr = d.createElement("tr");
-    let iniDate = data[i][0];
-    data[i][0] =
-      String(new Date(data[i][0]).getDate()).padStart(2, "0") +
+    let iniDate = data[i][1];
+    data[i][1] =
+      String(new Date(data[i][1]).getDate()).padStart(2, "0") +
       "/" +
-      String(new Date(data[i][0]).getMonth() + 1).padStart(2, "0") +
+      String(new Date(data[i][1]).getMonth() + 1).padStart(2, "0") +
       "/" +
-      new Date(data[i][0]).getFullYear();
-    for (let j = 0; j < data[i].length - 1; j++) {
+      new Date(data[i][1]).getFullYear();
+    for (let j = 1; j < data[i].length - 2; j++) {
       tr.append(d.createElement("td", enToBn(data[i][j])));
     }
-    data[i][0] = iniDate;
+    data[i][1] = iniDate;
+    let take = JSON.parse(data[i][data[i].length - 2]);
+    let takeTotal = 0;
+    for (let x = 0; x < take.length; x++) {
+      takeTotal += take[2];
+    }
+    tr.append(d.createElement("td", enToBn(takeTotal)));
     tr.append(
+      d.createElement(
+        "td",
+        d.createElement("img").setAttribute(
+          {
+            src: "./assets/img/edit.svg",
+            edit: i,
+          },
+          { style: "padding: 0;" }
+        )
+      ),
       d.createElement(
         "td",
         d.createElement("img").setAttribute(
           {
             src: "./assets/img/view.svg",
             view: i,
-          },
-          { style: "padding: 0;" }
-        ),
-        d.createElement("img").setAttribute(
-          {
-            src: "./assets/img/edit.svg",
-            edit: i,
           },
           { style: "padding: 0;" }
         )
@@ -128,7 +137,7 @@ const buttons = d.createElement(
   455,242.5 "/>`,
       {
         viewBox: "0 0 455 455",
-        onclick: "window.location='#/truckAdd'",
+        onclick: "window.location='#/giveTakeAdd'",
       }
     ),
   ],
@@ -168,7 +177,7 @@ giveTake.onload = async () => {
     header.onload();
     footer.onload();
     let database = await idb.createDataBase(presentMonthDatabase, {
-      keyPath: "date",
+      keyPath: "id",
     });
     try {
       let data = await idb.getAllValues("data");
@@ -179,6 +188,12 @@ giveTake.onload = async () => {
             data: data[i],
           };
           window.location = "#/giveTakeAdd";
+        };
+        document.querySelector(`img[view="${i}"]`).onclick = () => {
+          header.giveTake2Edit = {
+            data: data[i],
+          };
+          window.location = "#/giveTake2";
         };
       }
     } catch (err) {
@@ -231,24 +246,24 @@ giveTake.onload = async () => {
           for (let i = 0; i < past.length; i++) {
             past[i] = past[i].map((v) => v.substr(1));
             finalDataPast.push({
-              date: past[i][0],
+              id: past[i][0],
               data: past[i],
             });
           }
           let database = await idb.createDataBase(pastMonthDatabase, {
-            keyPath: "date",
+            keyPath: "id",
           });
           idb.add(finalDataPast);
           const finalDataPresent = [];
           for (let i = 0; i < present.length; i++) {
             present[i] = present[i].map((v) => v.substr(1));
             finalDataPresent.push({
-              date: present[i][0],
+              id: present[i][0],
               data: present[i],
             });
           }
           database = await idb.createDataBase(presentMonthDatabase, {
-            keyPath: "date",
+            keyPath: "id",
           });
           idb.add(finalDataPresent);
           let data = await idb.getAllValues("data");
@@ -260,6 +275,13 @@ giveTake.onload = async () => {
                   data: data[i],
                 };
                 window.location = "#/giveTakeAdd";
+              };
+            document.querySelector(`img[view="${i}"]`).onclick =
+              () => {
+                header.giveTake2Edit = {
+                  data: data[i],
+                };
+                window.location = "#/giveTake2";
               };
           }
         }
