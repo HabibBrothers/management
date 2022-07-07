@@ -63,6 +63,28 @@ const enToBn = (en) => {
   }
   return en;
 };
+
+const tableWrapper2 = d
+  .createElement("div")
+  .setAttribute({ class: "wrapper" });
+
+const table2 = d.createElement("table");
+const thead2 = d.createElement("thead");
+
+const titles2 = ["তারিখ", "ধরণ", "মাধ্যম", "পরিমাণ", "আপডেট"];
+
+const theadTr2 = d.createElement("tr");
+for (let x of titles2) {
+  theadTr2.append(
+    d.createElement("th", x)
+    // ({ style: [`width: ${x.length * 10}px`] })
+  );
+}
+
+thead2.append(theadTr2);
+
+const tbody2 = d.createElement("tbody");
+
 const dataPrint = (data, start, end) => {
   data.sort((a, b) => {
     return new Date(b[1]).getTime() - new Date(a[1]).getTime();
@@ -123,8 +145,50 @@ const dataPrint = (data, start, end) => {
   return data;
 };
 
+const dataPrint2 = (data) => {
+  let id = data[0];
+  data[4] = JSON.parse(data[4]).map((value) => {
+    let date = value[0];
+    value = value.shift();
+    return [date, "নেওয়া", ...value];
+  });
+  data[4].sort((a, b) => {
+    return new Date(b[1]).getTime() - new Date(a[1]).getTime();
+  });
+  data = [[data[1], "দেওয়া", data[2], data[3], data[5]], ...data[4]];
+
+  for (let i = 0; i < data.length; i++) {
+    const tr = d.createElement("tr");
+    data[i][0] =
+      String(new Date(data[i][0]).getDate()).padStart(2, "0") +
+      "/" +
+      String(new Date(data[i][0]).getMonth() + 1).padStart(2, "0") +
+      "/" +
+      new Date(data[i][0]).getFullYear();
+    for (let j = 0; j < data[i].length - 1; j++) {
+      tr.append(d.createElement("td", enToBn(data[i][j])));
+    }
+    tr.append(
+      d.createElement(
+        "td",
+        d.createElement("img").setAttribute(
+          {
+            src: "./assets/img/edit.svg",
+            edit: i,
+          },
+          { style: "padding: 0;" }
+        )
+      )
+    );
+    tbody2.append(tr);
+  }
+  return data;
+};
+
 table.append(thead, tbody);
 tableWrapper.append(table);
+table2.append(thead2, tbody2);
+tableWrapper2.append(table2);
 
 main.append(h1, loading);
 
@@ -144,13 +208,64 @@ const buttons = d.createElement(
   { class: "buttons" }
 );
 
+const buttons2 = d.createElement(
+  "div",
+  [
+    d.createElement(
+      "svg",
+      `<polygon points="455,212.5 242.5,212.5 242.5,0 212.5,0 212.5,212.5 0,212.5 0,242.5 212.5,242.5 212.5,455 242.5,455 242.5,242.5 
+  455,242.5 "/>`,
+      {
+        viewBox: "0 0 455 455",
+        onclick: "window.location='#/giveTakeAdd2'",
+      }
+    ),
+  ],
+  { class: "buttons" }
+);
+
 giveTake.append(header, main, footer);
 
 giveTake.onload = async () => {
   header.onload();
   footer.onload();
+  if (
+    window.location.hash.toString().replace("#/", "") ==
+      "giveTake2" &&
+    header.giveTake2Edit
+  ) {
+    let { data } = header.giveTake2Edit;
+    let data2 = [...data];
+    h1.setChildren(`নেওয়ার হিসাব`);
+    main.setChildren([h1, tableWrapper2]);
+    giveTake._rendered = false;
+    giveTake.insert(2, buttons2);
+    document.getElementById("root").innerHTML = giveTake._render();
+    data = dataPrint2(data);
+    document.querySelector(`img[edit="${0}"]`).onclick = () => {
+      header.giveTakeEdit = {
+        data: data2,
+      };
+      window.location = "#/giveTakeAdd";
+    };
+    for (let i = 1; i < data.length; i++) {
+      document.querySelector(`img[edit="${i}"]`).onclick = () => {
+        header.giveTakeEdit = {
+          data: data[i],
+        };
+        window.location = "#/giveTakeAdd2";
+      };
+    }
+    return;
+  } else if (
+    window.location.hash.toString().replace("#/", "") == "giveTake2"
+  ) {
+    window.location = "#/giveTake";
+    return;
+  }
   const page = "giveTake";
   delete header.giveTakeEdit;
+  delete header.giveTake2Edit;
   header.page = page;
   h1.setChildren(`দেওয়া নেওয়া হিসাব`);
   let year = new Date().getFullYear();
