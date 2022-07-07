@@ -255,6 +255,7 @@ giveTake.onload = async () => {
     for (let i = 1; i < data.length; i++) {
       document.querySelector(`img[edit="${i}"]`).onclick = () => {
         let date = data[i].shift();
+        data[i].shift();
         header.giveTakeEdit = {
           data: [date, ...data[i]],
           id: JSON.parse(data2[4])[i - 1].id,
@@ -266,6 +267,7 @@ giveTake.onload = async () => {
     header.take = {
       data: data2,
     };
+    delete header.giveTakeEdit;
     return;
   } else if (
     window.location.hash.toString().replace("#/", "") == "giveTake2"
@@ -276,6 +278,7 @@ giveTake.onload = async () => {
   const page = "giveTake";
   delete header.giveTakeEdit;
   delete header.giveTake2Edit;
+  delete header.take;
   header.page = page;
   h1.setChildren(`দেওয়া নেওয়া হিসাব`);
   let year = new Date().getFullYear();

@@ -112,6 +112,9 @@ const addRequest = async () => {
   Data[4] = JSON.parse(Data[4]);
   Data[4].push({ id: id, data: data });
   Data[4] = JSON.stringify(Data[4]);
+  header.giveTake2Edit = {
+    data: Data,
+  };
   idb
     .put(Data[0], {
       data: Data,
@@ -181,8 +184,19 @@ const editRequest = async (date, id) => {
   }
   data.push(new Date().toString());
   Data[4] = JSON.parse(Data[4]);
-  Data[4][id] = data;
-  Data[4] = JSON.stringify(Data[4]);
+  let iData = {};
+  for (let x of Data[4]) {
+    iData[x.id] = x.data;
+  }
+  iData[id] = data;
+  let fData = [];
+  for (let x in iData) {
+    fData.push({ id: x, data: iData[x] });
+  }
+  Data[4] = JSON.stringify(fData);
+  header.giveTake2Edit = {
+    data: Data,
+  };
   idb
     .put(Data[0], {
       data: Data,
@@ -250,7 +264,6 @@ const deleteRequest = async (id, index) => {
   for (let x of Data[4]) {
     iData[x.id] = x.data;
   }
-  console.log(iData, id);
   delete iData[id];
   let fData = [];
   for (let x in iData) {
