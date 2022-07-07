@@ -1,3 +1,20 @@
 {
-  
+  "background_color": "#ffffff",
+  "description": "Habib Brother's Business Management App",
+  "display": "standalone",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icon196.png",
+      "sizes": "196x196",
+      "type": "image/png"
+    }
+  ],
+  "name": "Management App",
+  "short_name": "Habib Brother's",
+  "start_url": "./index.html"
 }
