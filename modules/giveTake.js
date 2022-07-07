@@ -38,6 +38,7 @@ const titles = [
   "মাধ্যম",
   "দেওয়া",
   "নেওয়া",
+  "পাবো",
   "আপডেট",
   "বিস্তারিত",
 ];
@@ -115,9 +116,12 @@ const dataPrint = (data, start, end) => {
     let take = JSON.parse(data[i][data[i].length - 2]);
     let takeTotal = 0;
     for (let x = 0; x < take.length; x++) {
-      takeTotal += take[2];
+      takeTotal += Number(take[x].data[2]);
     }
     tr.append(d.createElement("td", enToBn(takeTotal)));
+    tr.append(
+      d.createElement("td", enToBn(Number(data[i][3]) - takeTotal))
+    );
     tr.append(
       d.createElement(
         "td",
@@ -146,14 +150,13 @@ const dataPrint = (data, start, end) => {
 };
 
 const dataPrint2 = (data) => {
-  let id = data[0];
   data[4] = JSON.parse(data[4]).map((value) => {
-    let date = value[0];
-    value = value.shift();
-    return [date, "নেওয়া", ...value];
+    let date = value.data[0];
+    value.data.shift();
+    return [date, "নেওয়া", ...value.data];
   });
   data[4].sort((a, b) => {
-    return new Date(b[1]).getTime() - new Date(a[1]).getTime();
+    return new Date(b[0]).getTime() - new Date(a[0]).getTime();
   });
   data = [[data[1], "দেওয়া", data[2], data[3], data[5]], ...data[4]];
 
@@ -235,13 +238,14 @@ giveTake.onload = async () => {
     header.giveTake2Edit
   ) {
     let { data } = header.giveTake2Edit;
+
     let data2 = [...data];
     h1.setChildren(`নেওয়ার হিসাব`);
     main.setChildren([h1, tableWrapper2]);
     giveTake._rendered = false;
     giveTake.insert(2, buttons2);
     document.getElementById("root").innerHTML = giveTake._render();
-    data = dataPrint2(data);
+    data = dataPrint2([...data]);
     document.querySelector(`img[edit="${0}"]`).onclick = () => {
       header.giveTakeEdit = {
         data: data2,
@@ -250,12 +254,18 @@ giveTake.onload = async () => {
     };
     for (let i = 1; i < data.length; i++) {
       document.querySelector(`img[edit="${i}"]`).onclick = () => {
+        let date = data[i].shift();
         header.giveTakeEdit = {
-          data: data[i],
+          data: [date, ...data[i]],
+          id: JSON.parse(data2[4])[i - 1].id,
+          i: i - 1,
         };
         window.location = "#/giveTakeAdd2";
       };
     }
+    header.take = {
+      data: data2,
+    };
     return;
   } else if (
     window.location.hash.toString().replace("#/", "") == "giveTake2"

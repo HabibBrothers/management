@@ -92,153 +92,70 @@ const addRequest = async () => {
     ]);
   error.changeAttribute("style", "display: none;");
   success.changeAttribute("style", "display: none;");
-  let year = new Date(date.getAttribute("value")[0]).getFullYear();
-  let month = new Date(date.getAttribute("value")[0]).getMonth() + 1;
+  let { data: Data } = header.take;
+  let year = new Date(Data[1]).getFullYear();
+  let month = new Date(Data[1]).getMonth() + 1;
   const idb = new db("com.infc.agency.habib-brother's");
   let presentMonthDatabase =
     "giveTake" + year + String(month).padStart(2, "0");
-  header.page = "giveTakeAdd";
-  let dataBaseCon = await idb.exit(presentMonthDatabase);
-  if (dataBaseCon) {
-    let database = await idb.createDataBase(presentMonthDatabase, {
-      keyPath: "id",
-    });
-    let id = new Date().getTime();
-    let data = [id, date.getAttribute("value")[0]];
-    delete FormInput.date;
-    for (let x in FormInput) {
-      data.push(eval(x).getAttribute("value")[0]);
-    }
-    data.push("[]");
-    data.push(new Date().toString());
-    idb
-      .add({
-        id: id,
-        data: data,
-      })
-      .then(async (res) => {
-        if (res == "success") {
-          succDiv.setChildren("অসাধারণ! আপনি সফল হয়েছেন।");
-          success.changeAttribute("style", "display: flex");
-          button
-            .setChildren("যোগ করুন")
-            .removeAttribute("disabled", "style");
-          let data = await idb.getAllValues("data");
-          data = data.map((value) => {
-            return value.map((v) => "t" + v);
-          });
-          d.post(
-            "https://script.google.com/macros/s/AKfycbymExR-OQWZdIEkT6AeLqj9mY92JzS_ucnntS2L/exec",
-            {
-              type: 10,
-              data: JSON.stringify({
-                year: year,
-                month: month,
-                data: data,
-              }),
-            }
-          ).catch((err) => console.log(err));
-        } else {
-          errDiv.setChildren("ওহ! সমস্যা হয়েছে।");
-          error.changeAttribute("style", "display: flex");
-          button
-            .setChildren("যোগ করুন")
-            .removeAttribute("disabled", "style");
-        }
-      })
-      .catch((err) => {
+  header.page = "TakeAdd";
+  let database = await idb.createDataBase(presentMonthDatabase, {
+    keyPath: "id",
+  });
+  let id = new Date().getTime();
+  let data = [date.getAttribute("value")[0]];
+  delete FormInput.date;
+  for (let x in FormInput) {
+    data.push(eval(x).getAttribute("value")[0]);
+  }
+  data.push(new Date().toString());
+  Data[4] = JSON.parse(Data[4]);
+  Data[4].push({ id: id, data: data });
+  Data[4] = JSON.stringify(Data[4]);
+  idb
+    .put(Data[0], {
+      data: Data,
+    })
+    .then(async (res) => {
+      if (res == "success") {
+        succDiv.setChildren("অসাধারণ! আপনি সফল হয়েছেন।");
+        success.changeAttribute("style", "display: flex");
+        button
+          .setChildren("যোগ করুন")
+          .removeAttribute("disabled", "style");
+        let data = await idb.getAllValues("data");
+        data = data.map((value) => {
+          return value.map((v) => "t" + v);
+        });
+        d.post(
+          "https://script.google.com/macros/s/AKfycbymExR-OQWZdIEkT6AeLqj9mY92JzS_ucnntS2L/exec",
+          {
+            type: 10,
+            data: JSON.stringify({
+              year: year,
+              month: month,
+              data: data,
+            }),
+          }
+        ).catch((err) => console.log(err));
+      } else {
         errDiv.setChildren("ওহ! সমস্যা হয়েছে।");
         error.changeAttribute("style", "display: flex");
         button
           .setChildren("যোগ করুন")
           .removeAttribute("disabled", "style");
-      });
-  } else {
-    d.post(
-      "https://script.google.com/macros/s/AKfycbymExR-OQWZdIEkT6AeLqj9mY92JzS_ucnntS2L/exec",
-      {
-        type: 9,
-        data: JSON.stringify({
-          year: year,
-          month: month - 1,
-        }),
       }
-    ).then(async (res) => {
-      res = JSON.parse(JSON.parse(res).messege);
-      const { result, present } = res;
-      if (result) {
-        if (header.page == page) {
-          const finalDataPresent = [];
-          for (let i = 0; i < present.length; i++) {
-            present[i] = present[i].map((v) => v.substr(1));
-            finalDataPresent.push({
-              date: present[i][0],
-              data: present[i],
-            });
-          }
-          let database = await idb.createDataBase(dataBase, {
-            keyPath: "id",
-          });
-          let id = new Date().getTime();
-          let data = [id, date.getAttribute("value")[0]];
-          delete FormInput.date;
-          for (let x in FormInput) {
-            data.push(eval(x).getAttribute("value")[0]);
-          }
-          data.push("[]");
-          data.push(new Date().toString());
-          idb
-            .add([
-              ...finalDataPresent,
-              {
-                id: id,
-                data: data,
-              },
-            ])
-            .then(async (res) => {
-              if (res == "success") {
-                succDiv.setChildren("অসাধারণ! আপনি সফল হয়েছেন।");
-                success.changeAttribute("style", "display: flex");
-                button
-                  .setChildren("যোগ করুন")
-                  .removeAttribute("disabled", "style");
-                let data = await idb.getAllValues("data");
-                data = data.map((value) => {
-                  return value.map((v) => "t" + v);
-                });
-                d.post(
-                  "https://script.google.com/macros/s/AKfycbymExR-OQWZdIEkT6AeLqj9mY92JzS_ucnntS2L/exec",
-                  {
-                    type: 10,
-                    data: JSON.stringify({
-                      year: year,
-                      month: month,
-                      data: data,
-                    }),
-                  }
-                ).catch((err) => console.log(err));
-              } else {
-                errDiv.setChildren("ওহ! সমস্যা হয়েছে।");
-                error.changeAttribute("style", "display: flex");
-                button
-                  .setChildren("যোগ করুন")
-                  .removeAttribute("disabled", "style");
-              }
-            })
-            .catch((err) => {
-              errDiv.setChildren("ওহ! সমস্যা হয়েছে। তারিখ চেক করুন।");
-              error.changeAttribute("style", "display: flex");
-              button
-                .setChildren("যোগ করুন")
-                .removeAttribute("disabled", "style");
-            });
-        }
-      }
+    })
+    .catch((err) => {
+      errDiv.setChildren("ওহ! সমস্যা হয়েছে।");
+      error.changeAttribute("style", "display: flex");
+      button
+        .setChildren("যোগ করুন")
+        .removeAttribute("disabled", "style");
     });
-  }
 };
 
-const editRequest = async (id, date, take) => {
+const editRequest = async (date, id) => {
   button
     .setChildren("ইডিট হচ্ছে...")
     .changeAttribute("disabled", "")
@@ -247,24 +164,28 @@ const editRequest = async (id, date, take) => {
     ]);
   error.changeAttribute("style", "display: none;");
   success.changeAttribute("style", "display: none;");
-  let year = new Date(date).getFullYear();
-  let month = new Date(date).getMonth() + 1;
+  let { data: Data } = header.take;
+  let year = new Date(Data[1]).getFullYear();
+  let month = new Date(Data[1]).getMonth() + 1;
   const idb = new db("com.infc.agency.habib-brother's");
   let presentMonthDatabase =
     "giveTake" + year + String(month).padStart(2, "0");
+  header.page = "TakeAdd";
   let database = await idb.createDataBase(presentMonthDatabase, {
     keyPath: "id",
   });
-  let data = [id, date];
+  let data = [date];
   delete FormInput.date;
   for (let x in FormInput) {
     data.push(eval(x).getAttribute("value")[0]);
   }
-  data.push(take);
   data.push(new Date().toString());
+  Data[4] = JSON.parse(Data[4]);
+  Data[4][id] = data;
+  Data[4] = JSON.stringify(Data[4]);
   idb
-    .put(id, {
-      data: data,
+    .put(Data[0], {
+      data: Data,
     })
     .then(async (res) => {
       if (res == "success") {
@@ -305,7 +226,7 @@ const editRequest = async (id, date, take) => {
     });
 };
 
-const deleteRequest = async (id, date) => {
+const deleteRequest = async (id, index) => {
   button2
     .setChildren("মুছে ফেলা হচ্ছে...")
     .changeAttribute("disabled", "")
@@ -314,16 +235,35 @@ const deleteRequest = async (id, date) => {
     ]);
   error.changeAttribute("style", "display: none;");
   success.changeAttribute("style", "display: none;");
-  let year = new Date(date).getFullYear();
-  let month = new Date(date).getMonth() + 1;
+  let { data: Data } = header.take;
+  let year = new Date(Data[1]).getFullYear();
+  let month = new Date(Data[1]).getMonth() + 1;
   const idb = new db("com.infc.agency.habib-brother's");
   let presentMonthDatabase =
     "giveTake" + year + String(month).padStart(2, "0");
+  header.page = "TakeAdd";
   let database = await idb.createDataBase(presentMonthDatabase, {
     keyPath: "id",
   });
+  Data[4] = JSON.parse(Data[4]);
+  let iData = {};
+  for (let x of Data[4]) {
+    iData[x.id] = x.data;
+  }
+  console.log(iData, id);
+  delete iData[id];
+  let fData = [];
+  for (let x in iData) {
+    fData.push({ id: x, data: iData[x] });
+  }
+  Data[4] = JSON.stringify(fData);
+  header.giveTake2Edit = {
+    data: Data,
+  };
   idb
-    .remove(id)
+    .put(Data[0], {
+      data: Data,
+    })
     .then(async (res) => {
       if (res == "success") {
         succDiv.setChildren("অসাধারণ! আপনি সফল হয়েছেন।");
@@ -340,7 +280,6 @@ const deleteRequest = async (id, date) => {
             data: JSON.stringify({
               year: year,
               month: month,
-              cement: cement,
               data: data,
             }),
           }
@@ -361,59 +300,64 @@ const deleteRequest = async (id, date) => {
 giveTakeAdd2.onload = () => {
   header.onload();
   footer.onload();
-  header.page = "giveTakeAdd";
-  h1.setChildren(`দেওয়া হিসাব`);
+  header.page = "TakeAdd";
+  h1.setChildren(`নেওয়া হিসাব`);
   form.reset();
-  if (header.giveTakeEdit) {
-    const { data } = header.giveTakeEdit;
-    date.changeAttribute("type", "text");
-    date.changeAttribute(
-      "value",
-      String(new Date(data[1]).getDate()).padStart(2, "0") +
-        "/" +
-        String(new Date(data[1]).getMonth() + 1).padStart(2, "0") +
-        "/" +
-        new Date(data[1]).getFullYear()
-    );
-    button2.init();
-    date.changeAttribute("disabled", "");
-    delete FormInput.date;
-    let i = 2;
-    for (let x in FormInput) {
-      eval(x).changeAttribute("value", data[i]);
-      i++;
+  if (header.take) {
+    if (header.giveTakeEdit) {
+      const { data, id, i: index } = header.giveTakeEdit;
+      date.changeAttribute("type", "text");
+      date.changeAttribute(
+        "value",
+        String(new Date(data[0]).getDate()).padStart(2, "0") +
+          "/" +
+          String(new Date(data[0]).getMonth() + 1).padStart(2, "0") +
+          "/" +
+          new Date(data[0]).getFullYear()
+      );
+      button2.init();
+      date.changeAttribute("disabled", "");
+      delete FormInput.date;
+      let i = 1;
+      for (let x in FormInput) {
+        eval(x).changeAttribute("value", data[i]);
+        i++;
+      }
+      button.setChildren("ইডিট করুন");
+      form.append(button2);
+      document.querySelector(".submitBtn2").onclick = () => {
+        form.removeElement(button);
+        deleteRequest(id, index);
+      };
+      document.forms["form"].onsubmit = (e) => {
+        e.preventDefault();
+        editRequest(data[0], id);
+      };
+    } else {
+      date.changeAttribute(
+        "value",
+        new Date().getFullYear() +
+          "-" +
+          String(new Date().getMonth() + 1).padStart(2, "0") +
+          "-" +
+          String(new Date().getDate()).padStart(2, "0")
+      );
+      date.changeAttribute(
+        "max",
+        new Date().getFullYear() +
+          "-" +
+          String(new Date().getMonth() + 1).padStart(2, "0") +
+          "-" +
+          String(new Date().getDate()).padStart(2, "0")
+      );
+      document.forms["form"].onsubmit = (e) => {
+        e.preventDefault();
+        addRequest();
+      };
     }
-    button.setChildren("ইডিট করুন");
-    form.append(button2);
-    document.querySelector(".submitBtn2").onclick = () => {
-      form.removeElement(button);
-      deleteRequest(data[0], data[1]);
-    };
-    document.forms["form"].onsubmit = (e) => {
-      e.preventDefault();
-      editRequest(data[0], data[1], data[4]);
-    };
   } else {
-    date.changeAttribute(
-      "value",
-      new Date().getFullYear() +
-        "-" +
-        String(new Date().getMonth() + 1).padStart(2, "0") +
-        "-" +
-        String(new Date().getDate()).padStart(2, "0")
-    );
-    date.changeAttribute(
-      "max",
-      new Date().getFullYear() +
-        "-" +
-        String(new Date().getMonth() + 1).padStart(2, "0") +
-        "-" +
-        String(new Date().getDate()).padStart(2, "0")
-    );
-    document.forms["form"].onsubmit = (e) => {
-      e.preventDefault();
-      addRequest();
-    };
+    window.location = "#/giveTake";
+    return;
   }
 
   window.nin = (input, type) => {
