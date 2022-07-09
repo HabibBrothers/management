@@ -66,7 +66,7 @@ const email = d.createElement("input").setAttribute({
   spellcheck: "false",
   autofocus: "",
   placeholder: "Please enter email address",
-  onchange: "nin(this, '1')",
+  onchange: "nin0(this, '1')",
 });
 
 const password = d.createElement("input").setAttribute({
@@ -74,7 +74,7 @@ const password = d.createElement("input").setAttribute({
   autocomplete: "off",
   type: "password",
   placeholder: "Please enter password",
-  onchange: "nin(this, '2')",
+  onchange: "nin0(this, '2')",
 });
 
 const con_password = d.createElement("input").setAttribute({
@@ -82,7 +82,7 @@ const con_password = d.createElement("input").setAttribute({
   autocomplete: "off",
   type: "password",
   placeholder: "Please enter confirm password",
-  onchange: "nin(this, '3')",
+  onchange: "nin0(this, '3')",
 });
 
 const FormInput = {
