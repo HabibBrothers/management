@@ -162,6 +162,7 @@ const dataPrint2 = (data) => {
 
   for (let i = 0; i < data.length; i++) {
     const tr = d.createElement("tr");
+    let iniDate = data[i][0];
     data[i][0] =
       String(new Date(data[i][0]).getDate()).padStart(2, "0") +
       "/" +
@@ -184,6 +185,7 @@ const dataPrint2 = (data) => {
       )
     );
     tbody2.append(tr);
+    data[i][0] = iniDate;
   }
   return data;
 };
