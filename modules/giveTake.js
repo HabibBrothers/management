@@ -1,59 +1,79 @@
-import d from "../assets/js/NTechDOM.js";
-import { header } from "./header.js";
+import d from "../lib/dom.js";
+import { header, measureText } from "./header.js";
 import { footer } from "./footer.js";
 import { loading } from "./loading.js";
-import db from "../assets/js/IDB.js";
+import {
+  db,
+  collection,
+  deleteDoc,
+  getDocs,
+  updateDoc,
+  doc,
+} from "../assets/js/firebase.js";
 
-const giveTake = d.createElement("div");
+const dbName = "giveTake";
 
-const main = d
-  .createElement("main")
-  .setAttribute({ class: ["main", "table"] });
-const h1 = d.createElement("h1");
+const { createElement, $ } = d;
 
-const interval = d
-  .createElement("div")
-  .setAttribute({ class: "interval" });
+const giveTake = createElement("div");
 
-const startDate = d.createElement("input").setAttribute({
-  type: "date",
-  onchange: "intervalDate(this, '1')",
+const main = createElement("main").setAttribute({
+  class: ["main", "table"],
+});
+const h1 = createElement("h1");
+
+const interval = createElement("div").setAttribute({
+  class: "interval",
 });
 
-const endDate = d.createElement("input").setAttribute({
+const startDate = createElement("input").setAttribute({
   type: "date",
-  onchange: "intervalDate(this, '2')",
+});
+
+const endDate = createElement("input").setAttribute({
+  type: "date",
 });
 
 interval.append(startDate, endDate);
-const tableWrapper = d
-  .createElement("div")
-  .setAttribute({ class: "wrapper" });
+const tableWrapper = createElement("div").setAttribute({
+  class: "wrapper",
+});
 
-const table = d.createElement("table");
-const thead = d.createElement("thead");
+const table = createElement("table");
+const thead = createElement("thead").setAttribute({
+  class: "sticky",
+});
 
 const titles = [
-  "তারিখ",
   "মাধ্যম",
   "দেওয়া",
   "নেওয়া",
-  "পাবো",
-  "আপডেট",
+  "পাওনা",
   "বিস্তারিত",
+  "আপডেট",
 ];
 
-const theadTr = d.createElement("tr");
+const measureTableData = {};
+
+for (let x in titles) {
+  const data = [];
+  data.push(92);
+  measureTableData[x] = data;
+}
+
+const theadTr = createElement("tr");
 for (let x of titles) {
   theadTr.append(
-    d.createElement("th", x)
+    createElement("th", x)
     // ({ style: [`width: ${x.length * 10}px`] })
   );
 }
 
 thead.append(theadTr);
 
-const tbody = d.createElement("tbody");
+const tbody = createElement("tbody").setAttribute({
+  class: "sticky",
+});
 
 const enToBn = (en) => {
   en = String(en);
@@ -65,139 +85,255 @@ const enToBn = (en) => {
   return en;
 };
 
-const tableWrapper2 = d
-  .createElement("div")
-  .setAttribute({ class: "wrapper" });
+const newOptionDiv = createElement("div").setAttribute({
+  class: "freeze hide",
+});
 
-const table2 = d.createElement("table");
-const thead2 = d.createElement("thead");
+const newOptionValue = createElement("input").setAttribute({
+  required: "",
+  autocomplete: "off",
+  type: "text",
+  spellcheck: "false",
+});
 
-const titles2 = ["তারিখ", "ধরণ", "মাধ্যম", "পরিমাণ", "আপডেট"];
+const newOptionId = createElement("input").setAttribute({
+  type: "hidden",
+});
 
-const theadTr2 = d.createElement("tr");
-for (let x of titles2) {
-  theadTr2.append(
-    d.createElement("th", x)
-    // ({ style: [`width: ${x.length * 10}px`] })
-  );
-}
-
-thead2.append(theadTr2);
-
-const tbody2 = d.createElement("tbody");
-
-const dataPrint = (data, start, end) => {
-  data.sort((a, b) => {
-    return new Date(b[1]).getTime() - new Date(a[1]).getTime();
-  });
-  if (start && end) {
-    data = data.filter((v) => {
-      // console.log(new Date(v[0]), new Date(start), new Date(end));
-      return (
-        new Date(v[1]).getTime() >= new Date(start).getTime() &&
-        new Date(v[1]).getTime() <= new Date(end).getTime()
-      );
-    });
-    if (!data.length) data = [];
+const closeBtnNew = createElement(
+  "svg",
+  `
+    <path fill-rule="evenodd" d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z"></path>
+  `,
+  {
+    "aria-hidden": "true",
+    style:
+      "fill: rgb(207, 34, 46);cursor: pointer;width: 20px;height: 20px;position: absolute;right: 10px;top: 10px;",
+    height: "16",
+    viewBox: "0 0 16 16",
+    version: "1.1",
+    width: "16",
+    "data-view-component": "true",
+    class: "octicon octicon-x",
   }
-  for (let i = 0; i < data.length; i++) {
-    const tr = d.createElement("tr");
-    let iniDate = data[i][1];
-    data[i][1] =
-      String(new Date(data[i][1]).getDate()).padStart(2, "0") +
-      "/" +
-      String(new Date(data[i][1]).getMonth() + 1).padStart(2, "0") +
-      "/" +
-      new Date(data[i][1]).getFullYear();
-    for (let j = 1; j < data[i].length - 2; j++) {
-      tr.append(d.createElement("td", enToBn(data[i][j])));
-    }
-    data[i][1] = iniDate;
-    let take = JSON.parse(data[i][data[i].length - 2]);
-    let takeTotal = 0;
-    for (let x = 0; x < take.length; x++) {
-      takeTotal += Number(take[x].data[2]);
-    }
-    tr.append(d.createElement("td", enToBn(takeTotal)));
-    tr.append(
-      d.createElement("td", enToBn(Number(data[i][3]) - takeTotal))
-    );
-    tr.append(
-      d.createElement(
-        "td",
-        d.createElement("img").setAttribute(
-          {
-            src: "./assets/img/edit.svg",
-            edit: i,
-          },
-          { style: "padding: 0;" }
-        )
-      ),
-      d.createElement(
-        "td",
-        d.createElement("img").setAttribute(
-          {
-            src: "./assets/img/view.svg",
-            view: i,
-          },
-          { style: "padding: 0;" }
-        )
-      )
-    );
-    tbody.append(tr);
-  }
-  return data;
+);
+
+closeBtnNew.onload = () => {
+  $(closeBtnNew).onclick = () => {
+    $(newOptionDivArea).style.transform = "scale(0)";
+    setTimeout(() => {
+      $(newOptionDiv).style.display = "none";
+    }, 100);
+  };
 };
 
-const dataPrint2 = (data) => {
-  data[4] = JSON.parse(data[4]).map((value) => {
-    let date = value.data[0];
-    value.data.shift();
-    return [date, "নেওয়া", ...value.data];
-  });
-  data[4].sort((a, b) => {
-    return new Date(b[0]).getTime() - new Date(a[0]).getTime();
-  });
-  data = [[data[1], "দেওয়া", data[2], data[3], data[5]], ...data[4]];
+const newOptionFormSubmitBtn = createElement("button", "আপডেট করুন", {
+  class: "submitBtn",
+  type: "submit",
+});
 
-  for (let i = 0; i < data.length; i++) {
-    const tr = d.createElement("tr");
-    let iniDate = data[i][0];
-    data[i][0] =
-      String(new Date(data[i][0]).getDate()).padStart(2, "0") +
-      "/" +
-      String(new Date(data[i][0]).getMonth() + 1).padStart(2, "0") +
-      "/" +
-      new Date(data[i][0]).getFullYear();
-    for (let j = 0; j < data[i].length - 1; j++) {
-      tr.append(d.createElement("td", enToBn(data[i][j])));
-    }
-    tr.append(
-      d.createElement(
-        "td",
-        d.createElement("img").setAttribute(
-          {
-            src: "./assets/img/edit.svg",
-            edit: i,
-          },
-          { style: "padding: 0;" }
-        )
-      )
+const newOptionFormDeleteBtn = createElement("button", "মুছে ফেলুন", {
+  class: "submitBtn",
+  type: "button",
+});
+
+newOptionFormDeleteBtn.onload = async () => {
+  $(newOptionFormDeleteBtn).onclick = async () => {
+    newOptionFormDeleteBtn
+      .setChildren("মুছে ফেলা হচ্ছে...")
+      .changeAttribute("disabled", "")
+      .changeAttribute("style", [
+        "background: #870000c9; color: #fcfcfcb0;",
+      ]);
+
+    const _giveDocs = await getDocs(
+      collection(db, `${dbName}/${$(newOptionId).value}/give`)
     );
-    tbody2.append(tr);
-    data[i][0] = iniDate;
+
+    _giveDocs.docs.forEach((element) => {
+      deleteDoc(
+        doc(db, dbName, $(newOptionId).value, "give", element.id)
+      );
+    });
+
+    const _takeDocs = await getDocs(
+      collection(db, `${dbName}/${$(newOptionId).value}/take`)
+    );
+    _takeDocs.docs.forEach((element) => {
+      deleteDoc(
+        doc(db, dbName, $(newOptionId).value, "take", element.id)
+      );
+    });
+
+    deleteDoc(doc(db, dbName, $(newOptionId).value));
+
+    main.setChildren([h1, loading]);
+
+    $(newOptionDiv).style.display = "none";
+    $(newOptionDivArea).style.transform = "scale(0)";
+    newOptionFormDeleteBtn
+      .setChildren("মুছে ফেলুন")
+      .removeAttribute("style", "disabled");
+    giveTake.onload();
+  };
+};
+
+const newOptionForm = createElement(
+  "form",
+  [
+    d.createElement("label", "মাধ্যম", {
+      class: "formLabel",
+    }),
+    newOptionValue,
+    newOptionId,
+    newOptionFormSubmitBtn,
+    newOptionFormDeleteBtn,
+  ],
+  {
+    class: "form",
+    style: " animation-name: none;",
   }
-  return data;
+);
+
+newOptionForm.onload = () => {
+  $(newOptionForm).onsubmit = async (e) => {
+    e.preventDefault();
+    newOptionFormSubmitBtn
+      .setChildren("আপডেট হচ্ছে...")
+      .changeAttribute("disabled", "")
+      .changeAttribute("style", [
+        "background: #870000c9; color: #fcfcfcb0;",
+      ]);
+
+    updateDoc(doc(db, dbName, $(newOptionId).value), {
+      value: $(newOptionValue).value,
+    });
+
+    main.setChildren([h1, loading]);
+
+    $(newOptionDiv).style.display = "none";
+    $(newOptionDivArea).style.transform = "scale(0)";
+    newOptionFormSubmitBtn
+      .setChildren("আপডেট করুন")
+      .removeAttribute("style", "disabled");
+
+    giveTake.onload();
+  };
+};
+
+const newOptionDivArea = createElement(
+  "div",
+  [closeBtnNew, createElement("h1", "মাধ্যম আপডেট"), newOptionForm],
+  {
+    class: "area",
+  }
+);
+
+newOptionDiv.append(newOptionDivArea);
+
+const dataPrint = (data, start, end) => {
+  tbody.setChildren([]);
+  for (let i = 0; i < data.length; i++) {
+    const _data = data[i];
+
+    const give = _data.give.filter((value) => {
+      return (
+        new Date(value.date).getTime() >= new Date(start).getTime() &&
+        new Date(value.date).getTime() <= new Date(end).getTime()
+      );
+    });
+
+    const take = _data.take.filter((value) => {
+      return (
+        new Date(value.date).getTime() >= new Date(start).getTime() &&
+        new Date(value.date).getTime() <= new Date(end).getTime()
+      );
+    });
+
+    let totalGive = 0;
+    for (let x of give) {
+      totalGive += Number(x.amount);
+    }
+
+    let totalTake = 0;
+    for (let x of take) {
+      totalTake += Number(x.amount);
+    }
+
+    const view = createElement("img").setAttribute(
+      {
+        src: "./assets/img/view.svg",
+      },
+      { style: "padding: 0;" }
+    );
+
+    view.onload = () => {
+      $(view).onclick = () => {
+        header.giveTakeId = _data.id;
+        window.location = "./#/giveTakeDetails";
+      };
+    };
+
+    const edit = createElement("img").setAttribute(
+      {
+        src: "./assets/img/edit.svg",
+      },
+      { style: "padding: 0;" }
+    );
+
+    edit.onload = () => {
+      $(edit).onclick = () => {
+        $(newOptionValue).value = _data.media;
+        $(newOptionId).value = _data.id;
+        $(newOptionDiv).style.display = "flex";
+        setTimeout(() => {
+          $(newOptionDivArea).style.transform = "scale(1)";
+        }, 100);
+      };
+    };
+
+    const tr = d.createElement("tr");
+    tr.append(createElement("td", _data.media));
+    tr.append(createElement("td", enToBn(totalGive)));
+    tr.append(createElement("td", enToBn(totalTake)));
+    tr.append(createElement("td", enToBn(totalGive - totalTake)));
+    tr.append(createElement("td", view));
+    tr.append(createElement("td", edit));
+    tbody.append(tr);
+
+    let childrens = tr._childrens;
+    for (let x in childrens) {
+      const data = measureTableData[x];
+      data.push(
+        measureText(
+          childrens[x]._childrens[0],
+          16,
+          "font-family: SolaimanLipi, monospace; padding: 0.625rem 0.25rem;"
+        ).width
+      );
+    }
+  }
+
+  const notAllow = [4, 5];
+  for (let x in measureTableData) {
+    if (notAllow.indexOf(Number(x)) >= 0) continue;
+    const padding = "0.25rem";
+    const maxWidth = Math.max(...measureTableData[x]);
+    if (maxWidth == 92) continue;
+    document.querySelectorAll("th")[
+      x
+    ].style.width = `calc(${maxWidth}px - ${padding})`;
+  }
 };
 
 table.append(thead, tbody);
 tableWrapper.append(table);
-table2.append(thead2, tbody2);
-tableWrapper2.append(table2);
+
+const buttonDiv = createElement("div");
 
 main.append(h1, loading);
 
-const buttons = d.createElement(
+const buttons = createElement(
   "div",
   [
     d.createElement(
@@ -213,330 +349,79 @@ const buttons = d.createElement(
   { class: "buttons" }
 );
 
-const buttons2 = d.createElement(
-  "div",
-  [
-    d.createElement(
-      "svg",
-      `<polygon points="455,212.5 242.5,212.5 242.5,0 212.5,0 212.5,212.5 0,212.5 0,242.5 212.5,242.5 212.5,455 242.5,455 242.5,242.5 
-  455,242.5 "/>`,
-      {
-        viewBox: "0 0 455 455",
-        onclick: "window.location='#/giveTakeAdd2'",
-      }
-    ),
-  ],
-  { class: "buttons" }
-);
-
-giveTake.append(header, main, footer);
+giveTake.append(header, main, buttonDiv, footer, newOptionDiv);
 
 giveTake.onload = async () => {
-  header.onload();
-  footer.onload();
-  if (
-    window.location.hash.toString().replace("#/", "") ==
-      "giveTake2" &&
-    header.giveTake2Edit
-  ) {
-    let { data } = header.giveTake2Edit;
-
-    let data2 = [...data];
-    h1.setChildren(`নেওয়ার হিসাব`);
-    main.setChildren([h1, tableWrapper2]);
-    giveTake._rendered = false;
-    giveTake.insert(2, buttons2);
-    document.getElementById("root").innerHTML = giveTake._render();
-    data = dataPrint2([...data]);
-    document.querySelector(`img[edit="${0}"]`).onclick = () => {
-      header.giveTakeEdit = {
-        data: data2,
-      };
-      window.location = "#/giveTakeAdd";
-    };
-    for (let i = 1; i < data.length; i++) {
-      document.querySelector(`img[edit="${i}"]`).onclick = () => {
-        let date = data[i].shift();
-        data[i].shift();
-        header.giveTakeEdit = {
-          data: [date, ...data[i]],
-          id: JSON.parse(data2[4])[i - 1].id,
-          i: i - 1,
-        };
-        window.location = "#/giveTakeAdd2";
-      };
-    }
-    header.take = {
-      data: data2,
-    };
-    delete header.giveTakeEdit;
-    return;
-  } else if (
-    window.location.hash.toString().replace("#/", "") == "giveTake2"
-  ) {
-    window.location = "#/giveTake";
-    return;
-  }
   const page = "giveTake";
-  delete header.giveTakeEdit;
-  delete header.giveTake2Edit;
-  delete header.take;
   header.page = page;
   h1.setChildren(`দেওয়া নেওয়া হিসাব`);
-  let year = new Date().getFullYear();
-  let month = new Date().getMonth() + 1;
-  const idb = new db("com.infc.agency.habib-brother's");
-  let presentMonthDatabase =
-    "giveTake" + year + String(month).padStart(2, "0");
-  let pastMonthDatabase =
-    "giveTake" +
-    year +
-    String(month - 1 ? month - 1 : 12).padStart(2, "0");
-  let pastMonth = await idb.exit(pastMonthDatabase);
-  if (pastMonth) {
-    const { start, end } = getInterval();
-    startDate.changeAttribute("value", start);
-    startDate.changeAttribute("max", end);
-    endDate.changeAttribute("value", end);
-    endDate.changeAttribute("max", end);
-    endDate.changeAttribute("min", start);
-    main.setChildren([h1, interval, tableWrapper]);
-    giveTake._rendered = false;
-    giveTake.insert(2, buttons);
-    document.getElementById("root").innerHTML = giveTake._render();
-    header.onload();
-    footer.onload();
-    let database = await idb.createDataBase(presentMonthDatabase, {
-      keyPath: "id",
+  const ref = collection(db, dbName);
+  let docs = await getDocs(ref);
+  let _data = [];
+  docs.docs.forEach((element) => {
+    _data.push({ ...element.data(), id: element.id });
+  });
+
+  const finalData = [];
+
+  for (let x of _data) {
+    const _giveDocs = await getDocs(
+      collection(db, `${dbName}/${x.id}/give`)
+    );
+    const _giveData = [];
+    _giveDocs.docs.forEach((element) => {
+      _giveData.push(element.data());
     });
-    try {
-      let data = await idb.getAllValues("data");
-      data = dataPrint(data, start, end);
-      for (let i = 0; i < data.length; i++) {
-        document.querySelector(`img[edit="${i}"]`).onclick = () => {
-          header.giveTakeEdit = {
-            data: data[i],
-          };
-          window.location = "#/giveTakeAdd";
-        };
-        document.querySelector(`img[view="${i}"]`).onclick = () => {
-          header.giveTake2Edit = {
-            data: data[i],
-          };
-          window.location = "#/giveTake2";
-        };
-      }
-    } catch (err) {
-      console.log(err);
-    }
-    let data = await idb.getAllValues("data");
-    data = data.map((value) => {
-      return value.map((v) => "t" + v);
+
+    const _takeDocs = await getDocs(
+      collection(db, `${dbName}/${x.id}/take`)
+    );
+    const _takeData = [];
+    _takeDocs.docs.forEach((element) => {
+      _takeData.push(element.data());
     });
-    d.post(
-      "https://script.google.com/macros/s/AKfycbymExR-OQWZdIEkT6AeLqj9mY92JzS_ucnntS2L/exec",
-      {
-        type: 10,
-        data: JSON.stringify({
-          year: year,
-          month: month,
-          data: data,
-        }),
-      }
-    ).catch((err) => console.log(err));
-  } else {
-    d.post(
-      "https://script.google.com/macros/s/AKfycbymExR-OQWZdIEkT6AeLqj9mY92JzS_ucnntS2L/exec",
-      {
-        type: 9,
-        data: JSON.stringify({
-          year: year,
-          month: month - 1,
-        }),
-      }
-    ).then(async (res) => {
-      res = JSON.parse(JSON.parse(res).messege);
-      const { result, present, past } = res;
-      if (result) {
-        const { start, end } = getInterval();
-        if (header.page == page) {
-          startDate.changeAttribute("value", start);
-          startDate.changeAttribute("max", end);
-          endDate.changeAttribute("value", end);
-          endDate.changeAttribute("max", end);
-          endDate.changeAttribute("min", start);
-          main.setChildren([h1, interval, tableWrapper]);
-          giveTake._rendered = false;
-          giveTake.insert(2, buttons);
-          document.getElementById("root").innerHTML =
-            giveTake._render();
-          header.onload();
-          footer.onload();
-          const finalDataPast = [];
-          for (let i = 0; i < past.length; i++) {
-            past[i] = past[i].map((v) => v.substr(1));
-            finalDataPast.push({
-              id: past[i][0],
-              data: past[i],
-            });
-          }
-          let database = await idb.createDataBase(pastMonthDatabase, {
-            keyPath: "id",
-          });
-          idb.add(finalDataPast);
-          const finalDataPresent = [];
-          for (let i = 0; i < present.length; i++) {
-            present[i] = present[i].map((v) => v.substr(1));
-            finalDataPresent.push({
-              id: present[i][0],
-              data: present[i],
-            });
-          }
-          database = await idb.createDataBase(presentMonthDatabase, {
-            keyPath: "id",
-          });
-          idb.add(finalDataPresent);
-          let data = await idb.getAllValues("data");
-          data = dataPrint(data, start, end);
-          for (let i = 0; i < data.length; i++) {
-            document.querySelector(`img[edit="${i}"]`).onclick =
-              () => {
-                header.giveTakeEdit = {
-                  data: data[i],
-                };
-                window.location = "#/giveTakeAdd";
-              };
-            document.querySelector(`img[view="${i}"]`).onclick =
-              () => {
-                header.giveTake2Edit = {
-                  data: data[i],
-                };
-                window.location = "#/giveTake2";
-              };
-          }
-        }
-      }
+
+    finalData.push({
+      give: _giveData,
+      take: _takeData,
+      media: x.value,
+      id: x.id,
     });
   }
 
-  window.intervalDate = async (input, type) => {
-    let start, end;
-    const page = "giveTake";
-    if (type == 1) {
-      let data = getInterval(input.value);
-      (start = data.start), (end = data.end);
-      startDate.changeAttribute("max", getInterval().end);
-      endDate.changeAttribute("max", end);
-      endDate.changeAttribute("min", start);
-    } else {
-      start = getInterval(startDate.getAttribute("value")[0]).start;
-      end = getInterval(input.value).start;
-    }
-    let year = new Date(start).getFullYear();
-    let month = new Date(start).getMonth() + 1;
-    const idb = new db("com.infc.agency.habib-brother's");
-    let dataBase = "giveTake" + year + String(month).padStart(2, "0");
-    let dataBaseData = await idb.exit(dataBase);
-    main.setChildren([h1, loading]);
-    if (dataBaseData) {
-      tableWrapper.init();
-      startDate.changeAttributeN("value", start);
-      endDate.changeAttributeN("value", end);
-      main.setChildren([h1, interval, tableWrapper]);
-      giveTake._rendered = false;
-      giveTake.insert(2, buttons);
-      document.getElementById("root").innerHTML = giveTake._render();
-      try {
-        let database = await idb.createDataBase(dataBase, {
-          keyPath: "date",
-        });
-        let data = await idb.getAllValues("data");
-        data = dataPrint(data, start, end);
-        for (let i = 0; i < data.length; i++) {
-          document.querySelector(`img[edit="${i}"]`).onclick = () => {
-            header.giveTakeEdit = {
-              data: data[i],
-            };
-            window.location = "#/giveTakeAdd";
-          };
-        }
-      } catch (err) {
-        console.log(err);
-      }
-      let data = await idb.getAllValues("data");
-      data = data.map((value) => {
-        return value.map((v) => "t" + v);
-      });
-      d.post(
-        "https://script.google.com/macros/s/AKfycbymExR-OQWZdIEkT6AeLqj9mY92JzS_ucnntS2L/exec",
-        {
-          type: 10,
-          data: JSON.stringify({
-            year: year,
-            month: month,
-            data: data,
-          }),
-        }
-      ).catch((err) => console.log(err));
-    } else {
-      d.post(
-        "https://script.google.com/macros/s/AKfycbymExR-OQWZdIEkT6AeLqj9mY92JzS_ucnntS2L/exec",
-        {
-          type: 9,
-          data: JSON.stringify({
-            year: year,
-            month: month - 1,
-          }),
-        }
-      ).then(async (res) => {
-        res = JSON.parse(JSON.parse(res).messege);
-        const { result, present } = res;
-        if (result) {
-          if (header.page == page) {
-            tableWrapper.init();
-            startDate.changeAttributeN("value", start);
-            endDate.changeAttributeN("value", end);
-            main.setChildren([h1, interval, tableWrapper]);
-            giveTake._rendered = false;
-            giveTake.insert(2, buttons);
-            document.getElementById("root").innerHTML =
-              giveTake._render();
-            const finalDataPresent = [];
-            for (let i = 0; i < present.length; i++) {
-              present[i] = present[i].map((v) => v.substr(1));
-              finalDataPresent.push({
-                date: present[i][0],
-                data: present[i],
-              });
-            }
-            let database = await idb.createDataBase(dataBase, {
-              keyPath: "date",
-            });
-            idb.add(finalDataPresent);
+  const { start, end } = getInterval();
+  main.setChildren([h1, interval, tableWrapper]);
+  $(startDate).value = start;
+  $(startDate).max = end;
+  $(endDate).value = end;
+  $(endDate).min = start;
+  $(endDate).max = end;
 
-            let data = await idb.getAllValues("data");
-            data = dataPrint(data, start, end);
-            for (let i = 0; i < data.length; i++) {
-              document.querySelector(`img[edit="${i}"]`).onclick =
-                () => {
-                  header.giveTakeEdit = {
-                    data: data[i],
-                  };
-                  window.location = "#/giveTakeAdd";
-                };
-            }
-          }
-        }
-      });
-    }
+  dataPrint(finalData, start, end);
+  buttonDiv.setChildren(buttons);
+
+  $(startDate).onchange = () => {
+    const { start, end } = getInterval($(startDate).value);
+    $(startDate).value = start;
+    $(startDate).max = end;
+    $(endDate).value = end;
+    $(endDate).min = start;
+    $(endDate).max = end;
+
+    dataPrint(finalData, start, end);
+  };
+
+  $(endDate).onchange = () => {
+    const start = $(startDate).value;
+    const end = $(endDate).value;
+    dataPrint(finalData, start, end);
   };
 };
 
-function getInterval(date = "") {
+const getInterval = (date = "") => {
   let result = {};
   let monthDays = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
   let startDate = 1;
-  let endDate = 15;
   if (date) {
     startDate = new Date(date).getDate();
     if (
@@ -544,59 +429,31 @@ function getInterval(date = "") {
       new Date(date).getMonth() == new Date().getMonth()
     )
       startDate = new Date().getDate();
-    // if (new Date(date).getDate() > 15) {
-    //   startDate = 16;
-    // }
-    if (startDate >= 16) {
-      endDate = monthDays[new Date(date).getMonth()];
-      if (new Date(date).getFullYear() / 4 == 0 && endDate == 28)
-        endDate = 29;
-      if (
-        new Date(date).getMonth() == new Date().getMonth() &&
-        endDate > new Date().getDate()
-      ) {
-        endDate = new Date().getDate();
-      }
-    }
-    if (
-      endDate > new Date().getDate() &&
-      new Date(date).getMonth() == new Date().getMonth()
-    )
-      endDate = new Date().getDate();
     result.start =
       new Date(date).getFullYear() +
       "-" +
       String(new Date(date).getMonth() + 1).padStart(2, "0") +
       "-" +
       String(startDate).padStart(2, "0");
-
-    result.end =
-      new Date(date).getFullYear() +
-      "-" +
-      String(new Date(date).getMonth() + 1).padStart(2, "0") +
-      "-" +
-      String(endDate).padStart(2, "0");
   } else {
     date = new Date().toString();
-    if (new Date(date).getDate() > 15) {
-      startDate = 16;
-    }
     result.start =
       new Date(date).getFullYear() +
       "-" +
       String(new Date(date).getMonth() + 1).padStart(2, "0") +
       "-" +
       String(startDate).padStart(2, "0");
-
-    result.end =
-      new Date(date).getFullYear() +
-      "-" +
-      String(new Date(date).getMonth() + 1).padStart(2, "0") +
-      "-" +
-      String(new Date(date).getDate()).padStart(2, "0");
   }
 
+  date = new Date().toString();
+  result.end =
+    new Date(date).getFullYear() +
+    "-" +
+    String(new Date(date).getMonth() + 1).padStart(2, "0") +
+    "-" +
+    String(new Date(date).getDate()).padStart(2, "0");
+
   return result;
-}
+};
 
 export { giveTake };

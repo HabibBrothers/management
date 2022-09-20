@@ -1,423 +1,372 @@
-import d from "../assets/js/NTechDOM.js";
+import d from "../lib/dom.js";
 import { header } from "./header.js";
 import { footer } from "./footer.js";
-import db from "../assets/js/IDB.js";
+import { loading } from "./loading.js";
 
-const giveTakeAdd = d.createElement("div");
-const main = d.createElement("main").setAttribute({ class: "main" });
-const h1 = d.createElement("h1");
+import {
+  db,
+  collection,
+  getDocs,
+  addDoc,
+  serverTimestamp,
+  doc,
+  getDoc,
+} from "../assets/js/firebase.js";
 
-const form = d
-  .createElement("form")
-  .setAttribute({ class: "form", name: "form" });
+const { createElement, $ } = d;
 
-const date = d.createElement("input").setAttribute({
+const dbName = "giveTake";
+
+const giveTakeAdd = createElement("div");
+const main = createElement("main").setAttribute({ class: "main" });
+const h1 = createElement("h1");
+
+const form = createElement("form").setAttribute({
+  class: "form",
+  name: "form",
+});
+
+const date = createElement("input").setAttribute({
   required: "",
   autocomplete: "off",
   type: "date",
-  onchange: "nin(this, 'date')",
+  spellcheck: "false",
 });
 
-const media = d.createElement("input").setAttribute({
+const media = createElement("select").setAttribute({
+  required: "",
+});
+
+const newOptionDiv = createElement("div").setAttribute({
+  class: "freeze hide",
+});
+
+const newOptionValue = createElement("input").setAttribute({
   required: "",
   autocomplete: "off",
   type: "text",
-  oninput: "nin(this, 'media')",
+  spellcheck: "false",
 });
 
-const amount = d.createElement("input").setAttribute({
+const closeBtnNew = createElement(
+  "svg",
+  `
+    <path fill-rule="evenodd" d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z"></path>
+  `,
+  {
+    "aria-hidden": "true",
+    style:
+      "fill: rgb(207, 34, 46);cursor: pointer;width: 20px;height: 20px;position: absolute;right: 10px;top: 10px;",
+    height: "16",
+    viewBox: "0 0 16 16",
+    version: "1.1",
+    width: "16",
+    "data-view-component": "true",
+    class: "octicon octicon-x",
+  }
+);
+
+closeBtnNew.onload = () => {
+  $(closeBtnNew).onclick = () => {
+    $(media).value = "";
+    $(newOptionDivArea).style.transform = "scale(0)";
+    setTimeout(() => {
+      $(newOptionDiv).style.display = "none";
+    }, 100);
+  };
+};
+
+const newOptionFormSubmitBtn = createElement("button", "যোগ করুন", {
+  class: "submitBtn",
+  type: "submit",
+});
+
+const newOptionForm = createElement(
+  "form",
+  [
+    d.createElement("label", "মাধ্যম", {
+      class: "formLabel",
+    }),
+    newOptionValue,
+    newOptionFormSubmitBtn,
+  ],
+  {
+    class: "form",
+    style: " animation-name: none;",
+  }
+);
+
+newOptionForm.onload = () => {
+  $(newOptionForm).onsubmit = async (e) => {
+    e.preventDefault();
+    newOptionFormSubmitBtn
+      .setChildren("যোগ হচ্ছে...")
+      .changeAttribute("disabled", "")
+      .changeAttribute("style", [
+        "background: #870000c9; color: #fcfcfcb0;",
+      ]);
+
+    addDoc(collection(db, dbName), {
+      value: $(newOptionValue).value,
+    });
+
+    $(media).value = "";
+    setTimeout(() => {
+      $(newOptionDiv).style.display = "none";
+      $(newOptionDivArea).style.transform = "scale(0)";
+      newOptionFormSubmitBtn
+        .setChildren("যোগ করুন")
+        .removeAttribute("style", "disabled");
+    }, 500);
+    giveTakeAdd.onload();
+  };
+};
+
+const newOptionDivArea = createElement(
+  "div",
+  [closeBtnNew, createElement("h1", "নতুন মাধ্যম"), newOptionForm],
+  {
+    class: "area",
+  }
+);
+
+newOptionDiv.append(newOptionDivArea);
+
+media.onload = () => {
+  $(media).onchange = (e) => {
+    if ($(media).value == "new") {
+      $(newOptionForm).reset();
+      $(newOptionDiv).style.display = "flex";
+      setTimeout(() => {
+        $(newOptionDivArea).style.transform = "scale(1)";
+      }, 100);
+      //console.log("new media choose");
+    }
+  };
+};
+
+const mediaOptionLoad = (mediaList) => {
+  media.setChildren([createElement("option")]);
+  for (let x of mediaList) {
+    media.append(
+      createElement("option", x.value, {
+        value: x.id,
+        text: x.value,
+      })
+    );
+  }
+
+  media.append(
+    createElement("option", "নতুন মাধ্যম", {
+      value: "new",
+    })
+  );
+};
+
+const type = createElement(
+  "select",
+  [
+    createElement("option", ""),
+    createElement("option", "দেওয়া", { value: "give" }),
+    createElement("option", "নেওয়া", { value: "take" }),
+  ],
+  {
+    required: "",
+  }
+);
+
+const details = createElement("input").setAttribute({
   required: "",
   autocomplete: "off",
-  type: "number",
-  oninput: "nin(this, 'amount')",
+  type: "text",
+  spellcheck: "false",
 });
 
-const error = d.createElement("div", "", { class: "error" });
-const errDiv = d.createElement("div", "", {
+const amount = createElement("input").setAttribute({
+  required: "",
+  autocomplete: "off",
+  type: "text",
+  spellcheck: "false",
+});
+
+const error = createElement("div", "", { class: "error" });
+const errDiv = createElement("div", "", {
   style: "width: 100%; text-align: left;",
 });
-const closeBtn = `
-<svg onclick="closeDiv('.error')" aria-hidden="true" style="fill: rgb(207, 34, 46); cursor: pointer" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-x">
+const closeBtn = createElement(
+  "svg",
+  `
     <path fill-rule="evenodd" d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z"></path>
-</svg>
-`;
+  `,
+  {
+    "aria-hidden": "true",
+    style: "fill: rgb(207, 34, 46); cursor: pointer",
+    height: "16",
+    viewBox: "0 0 16 16",
+    version: "1.1",
+    width: "16",
+    "data-view-component": "true",
+    class: "octicon octicon-x",
+  }
+);
+closeBtn.onload = () => {
+  $(closeBtn).onclick = () => {
+    $(error).style.display = "none";
+  };
+};
 error.append(errDiv, closeBtn);
 
-const success = d.createElement("div", "", { class: "success" });
-const succDiv = d.createElement("div", "", {
+const success = createElement("div", "", { class: "success" });
+const succDiv = createElement("div", "", {
   style: "width: 100%; text-align: left;",
 });
-const closeBtn2 = `
-<svg onclick="closeDiv('.success')" aria-hidden="true" style="fill: rgb(34, 207, 92); cursor: pointer" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-x">
+const closeBtn2 = createElement(
+  "svg",
+  `
     <path fill-rule="evenodd" d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z"></path>
-</svg>
-`;
+  `,
+  {
+    "aria-hidden": "true",
+    style: "fill: rgb(34, 207, 92); cursor: pointer",
+    height: "16",
+    viewBox: "0 0 16 16",
+    version: "1.1",
+    width: "16",
+    "data-view-component": "true",
+    class: "octicon octicon-x",
+  }
+);
+
+closeBtn2.onload = () => {
+  $(closeBtn2).onclick = () => {
+    $(success).style.display = "none";
+  };
+};
 success.append(succDiv, closeBtn2);
 
 const FormInput = {
   date: "তারিখ",
   media: "মাধ্যম",
+  type: "ধরণ",
+  details: "বর্ণনা",
   amount: "পরিমাণ",
 };
 
 for (let x in FormInput) {
   form.append(
-    d.createElement("label", FormInput[x], {
+    createElement("label", FormInput[x], {
       class: "formLabel",
     }),
     eval(x)
   );
 }
 
-const button = d.createElement("button", "যোগ করুন", {
+const button = createElement("button", "যোগ করুন", {
   class: "submitBtn",
   type: "submit",
 });
 
-const button2 = d.createElement("button", "মুছে ফেলুন", {
-  class: "submitBtn2",
-  type: "button",
-});
-
 form.append(success, error, button);
-main.append(h1, form);
-giveTakeAdd.append(header, main, footer);
 
-const addRequest = async () => {
-  button
-    .setChildren("যোগ হচ্ছে...")
-    .changeAttribute("disabled", "")
-    .changeAttribute("style", [
-      "background: #870000c9; color: #fcfcfcb0;",
-    ]);
-  error.changeAttribute("style", "display: none;");
-  success.changeAttribute("style", "display: none;");
-  let year = new Date(date.getAttribute("value")[0]).getFullYear();
-  let month = new Date(date.getAttribute("value")[0]).getMonth() + 1;
-  const idb = new db("com.infc.agency.habib-brother's");
-  let presentMonthDatabase =
-    "giveTake" + year + String(month).padStart(2, "0");
-  header.page = "giveTakeAdd";
-  let dataBaseCon = await idb.exit(presentMonthDatabase);
-  if (dataBaseCon) {
-    let database = await idb.createDataBase(presentMonthDatabase, {
-      keyPath: "id",
-    });
-    let id = new Date().getTime();
-    let data = [id, date.getAttribute("value")[0]];
-    delete FormInput.date;
-    for (let x in FormInput) {
-      data.push(eval(x).getAttribute("value")[0]);
-    }
-    data.push("[]");
-    data.push(new Date().toString());
-    idb
-      .add({
-        id: id,
-        data: data,
-      })
-      .then(async (res) => {
-        if (res == "success") {
-          succDiv.setChildren("অসাধারণ! আপনি সফল হয়েছেন।");
-          success.changeAttribute("style", "display: flex");
-          button
-            .setChildren("যোগ করুন")
-            .removeAttribute("disabled", "style");
-          let data = await idb.getAllValues("data");
-          data = data.map((value) => {
-            return value.map((v) => "t" + v);
-          });
-          d.post(
-            "https://script.google.com/macros/s/AKfycbymExR-OQWZdIEkT6AeLqj9mY92JzS_ucnntS2L/exec",
-            {
-              type: 10,
-              data: JSON.stringify({
-                year: year,
-                month: month,
-                data: data,
-              }),
-            }
-          ).catch((err) => console.log(err));
-        } else {
-          errDiv.setChildren("ওহ! সমস্যা হয়েছে।");
-          error.changeAttribute("style", "display: flex");
-          button
-            .setChildren("যোগ করুন")
-            .removeAttribute("disabled", "style");
-        }
-      })
-      .catch((err) => {
-        errDiv.setChildren("ওহ! সমস্যা হয়েছে।");
-        error.changeAttribute("style", "display: flex");
-        button
-          .setChildren("যোগ করুন")
-          .removeAttribute("disabled", "style");
-      });
-  } else {
-    d.post(
-      "https://script.google.com/macros/s/AKfycbymExR-OQWZdIEkT6AeLqj9mY92JzS_ucnntS2L/exec",
-      {
-        type: 9,
-        data: JSON.stringify({
-          year: year,
-          month: month - 1,
-        }),
-      }
-    ).then(async (res) => {
-      res = JSON.parse(JSON.parse(res).messege);
-      const { result, present } = res;
-      if (result) {
-        if (header.page == page) {
-          const finalDataPresent = [];
-          for (let i = 0; i < present.length; i++) {
-            present[i] = present[i].map((v) => v.substr(1));
-            finalDataPresent.push({
-              date: present[i][0],
-              data: present[i],
-            });
-          }
-          let database = await idb.createDataBase(dataBase, {
-            keyPath: "id",
-          });
-          let id = new Date().getTime();
-          let data = [id, date.getAttribute("value")[0]];
-          delete FormInput.date;
-          for (let x in FormInput) {
-            data.push(eval(x).getAttribute("value")[0]);
-          }
-          data.push("[]");
-          data.push(new Date().toString());
-          idb
-            .add([
-              ...finalDataPresent,
-              {
-                id: id,
-                data: data,
-              },
-            ])
-            .then(async (res) => {
-              if (res == "success") {
-                succDiv.setChildren("অসাধারণ! আপনি সফল হয়েছেন।");
-                success.changeAttribute("style", "display: flex");
-                button
-                  .setChildren("যোগ করুন")
-                  .removeAttribute("disabled", "style");
-                let data = await idb.getAllValues("data");
-                data = data.map((value) => {
-                  return value.map((v) => "t" + v);
-                });
-                d.post(
-                  "https://script.google.com/macros/s/AKfycbymExR-OQWZdIEkT6AeLqj9mY92JzS_ucnntS2L/exec",
-                  {
-                    type: 10,
-                    data: JSON.stringify({
-                      year: year,
-                      month: month,
-                      data: data,
-                    }),
-                  }
-                ).catch((err) => console.log(err));
-              } else {
-                errDiv.setChildren("ওহ! সমস্যা হয়েছে।");
-                error.changeAttribute("style", "display: flex");
-                button
-                  .setChildren("যোগ করুন")
-                  .removeAttribute("disabled", "style");
-              }
-            })
-            .catch((err) => {
-              errDiv.setChildren("ওহ! সমস্যা হয়েছে। তারিখ চেক করুন।");
-              error.changeAttribute("style", "display: flex");
-              button
-                .setChildren("যোগ করুন")
-                .removeAttribute("disabled", "style");
-            });
-        }
-      }
-    });
-  }
-};
+form.onload = () => {
+  $(form).onsubmit = (e) => {
+    e.preventDefault();
+    button
+      .setChildren("যোগ হচ্ছে...")
+      .changeAttribute("disabled", "")
+      .changeAttribute("style", [
+        "background: #870000c9; color: #fcfcfcb0;",
+      ]);
+    error.changeAttribute("style", "display: none;");
+    success.changeAttribute("style", "display: none;");
 
-const editRequest = async (id, date, take) => {
-  button
-    .setChildren("ইডিট হচ্ছে...")
-    .changeAttribute("disabled", "")
-    .changeAttribute("style", [
-      "background: #870000c9; color: #fcfcfcb0;",
-    ]);
-  error.changeAttribute("style", "display: none;");
-  success.changeAttribute("style", "display: none;");
-  let year = new Date(date).getFullYear();
-  let month = new Date(date).getMonth() + 1;
-  const idb = new db("com.infc.agency.habib-brother's");
-  let presentMonthDatabase =
-    "giveTake" + year + String(month).padStart(2, "0");
-  let database = await idb.createDataBase(presentMonthDatabase, {
-    keyPath: "id",
-  });
-  let data = [id, date];
-  delete FormInput.date;
-  for (let x in FormInput) {
-    data.push(eval(x).getAttribute("value")[0]);
-  }
-  data.push(take);
-  data.push(new Date().toString());
-  idb
-    .put(id, {
-      data: data,
-    })
-    .then(async (res) => {
-      if (res == "success") {
-        succDiv.setChildren("অসাধারণ! আপনি সফল হয়েছেন।");
-        success.changeAttribute("style", "display: flex");
-        button
-          .setChildren("ইডিট করুন")
-          .removeAttribute("disabled", "style");
-        let data = await idb.getAllValues("data");
-        data = data.map((value) => {
-          return value.map((v) => "t" + v);
-        });
-        d.post(
-          "https://script.google.com/macros/s/AKfycbymExR-OQWZdIEkT6AeLqj9mY92JzS_ucnntS2L/exec",
-          {
-            type: 10,
-            data: JSON.stringify({
-              year: year,
-              month: month,
-              data: data,
-            }),
-          }
-        ).catch((err) => console.log(err));
-      } else {
-        errDiv.setChildren("ওহ! সমস্যা হয়েছে।");
-        error.changeAttribute("style", "display: flex");
-        button
-          .setChildren("ইডিট করুন")
-          .removeAttribute("disabled", "style");
-      }
-    })
-    .catch((err) => {
-      errDiv.setChildren("ওহ! সমস্যা হয়েছে। তারিখ চেক করুন।");
+    let amountValue = Number($(amount).value);
+
+    if (isNaN(amountValue)) {
+      errDiv.setChildren("পরিমাণ সংখা হতে হবে!");
       error.changeAttribute("style", "display: flex");
       button
-        .setChildren("ইডিট করুন")
+        .setChildren("যোগ করুন")
         .removeAttribute("disabled", "style");
-    });
-};
-
-const deleteRequest = async (id, date) => {
-  button2
-    .setChildren("মুছে ফেলা হচ্ছে...")
-    .changeAttribute("disabled", "")
-    .changeAttribute("style", [
-      "background: #870000c9; color: #fcfcfcb0;",
-    ]);
-  error.changeAttribute("style", "display: none;");
-  success.changeAttribute("style", "display: none;");
-  let year = new Date(date).getFullYear();
-  let month = new Date(date).getMonth() + 1;
-  const idb = new db("com.infc.agency.habib-brother's");
-  let presentMonthDatabase =
-    "giveTake" + year + String(month).padStart(2, "0");
-  let database = await idb.createDataBase(presentMonthDatabase, {
-    keyPath: "id",
-  });
-  idb
-    .remove(id)
-    .then(async (res) => {
-      if (res == "success") {
-        succDiv.setChildren("অসাধারণ! আপনি সফল হয়েছেন।");
-        success.changeAttribute("style", "display: flex");
-        form.removeElement(button2);
-        let data = await idb.getAllValues("data");
-        data = data.map((value) => {
-          return value.map((v) => "t" + v);
-        });
-        d.post(
-          "https://script.google.com/macros/s/AKfycbymExR-OQWZdIEkT6AeLqj9mY92JzS_ucnntS2L/exec",
-          {
-            type: 10,
-            data: JSON.stringify({
-              year: year,
-              month: month,
-              cement: cement,
-              data: data,
-            }),
-          }
-        ).catch((err) => console.log(err));
-      } else {
-        errDiv.setChildren("ওহ! সমস্যা হয়েছে।");
-        error.changeAttribute("style", "display: flex");
-        form.removeElement(button2);
-      }
-    })
-    .catch((err) => {
-      errDiv.setChildren("ওহ! সমস্যা হয়েছে।");
-      error.changeAttribute("style", "display: flex");
-      form.removeElement(button2);
-    });
-};
-
-giveTakeAdd.onload = () => {
-  header.onload();
-  footer.onload();
-  header.page = "giveTakeAdd";
-  h1.setChildren(`দেওয়া হিসাব`);
-  form.reset();
-  if (header.giveTakeEdit) {
-    const { data } = header.giveTakeEdit;
-    date.changeAttribute("type", "text");
-    date.changeAttribute(
-      "value",
-      String(new Date(data[1]).getDate()).padStart(2, "0") +
-        "/" +
-        String(new Date(data[1]).getMonth() + 1).padStart(2, "0") +
-        "/" +
-        new Date(data[1]).getFullYear()
-    );
-    button2.init();
-    date.changeAttribute("disabled", "");
-    delete FormInput.date;
-    let i = 2;
-    for (let x in FormInput) {
-      eval(x).changeAttribute("value", data[i]);
-      i++;
+      return;
     }
-    button.setChildren("ইডিট করুন");
-    form.append(button2);
-    document.querySelector(".submitBtn2").onclick = () => {
-      form.removeElement(button);
-      deleteRequest(data[0], data[1]);
+    let data = {
+      date: $(date).value,
+      media:
+        $(media).querySelectorAll("option")[$(media).selectedIndex]
+          .innerText,
+      details: $(details).value,
+      amount: amountValue,
+      timespan: serverTimestamp(),
     };
-    document.forms["form"].onsubmit = (e) => {
-      e.preventDefault();
-      editRequest(data[0], data[1], data[4]);
-    };
-  } else {
-    date.changeAttribute(
-      "value",
-      new Date().getFullYear() +
-        "-" +
-        String(new Date().getMonth() + 1).padStart(2, "0") +
-        "-" +
-        String(new Date().getDate()).padStart(2, "0")
-    );
-    date.changeAttribute(
-      "max",
-      new Date().getFullYear() +
-        "-" +
-        String(new Date().getMonth() + 1).padStart(2, "0") +
-        "-" +
-        String(new Date().getDate()).padStart(2, "0")
-    );
-    document.forms["form"].onsubmit = (e) => {
-      e.preventDefault();
-      addRequest();
-    };
-  }
 
-  window.nin = (input, type) => {
-    eval(type).changeAttributeN("value", input.value);
+    addDoc(
+      collection(db, `${dbName}/${$(media).value}/${$(type).value}`),
+      data
+    );
+
+    $(form).reset();
+
+    succDiv.setChildren("অসাধারণ! আপনি সফল হয়েছেন।");
+    success.changeAttribute("style", "display: flex");
+    button
+      .setChildren("যোগ করুন")
+      .removeAttribute("disabled", "style");
+    $(date).value =
+      new Date().getFullYear() +
+      "-" +
+      String(new Date().getMonth() + 1).padStart(2, "0") +
+      "-" +
+      String(new Date().getDate()).padStart(2, "0");
   };
 };
+
+main.append(h1, loading);
+giveTakeAdd.append(header, main, footer, newOptionDiv);
+
+giveTakeAdd.onload = async () => {
+  header.page = "giveTakeAdd";
+  h1.setChildren(`দেওয়া নেওয়ার হিসাব`);
+  const id = header.giveTakeId;
+  if (id) {
+    const x = {
+      id: id,
+      value: await (await getDoc(doc(db, dbName, id))).data().value,
+    };
+    media.setChildren([
+      createElement("option", x.value, {
+        value: x.id,
+        text: x.value,
+      }),
+    ]);
+
+    media.onload = () => {
+      $(media).disabled = true;
+    };
+  } else {
+    const ref = collection(db, dbName);
+    let docs = await getDocs(ref);
+    const mediaList = [];
+    docs.docs.forEach((element) => {
+      mediaList.push({ ...element.data(), id: element.id });
+    });
+
+    mediaOptionLoad(mediaList);
+  }
+  main.setChildren([h1, form]);
+
+  $(date).value =
+    new Date().getFullYear() +
+    "-" +
+    String(new Date().getMonth() + 1).padStart(2, "0") +
+    "-" +
+    String(new Date().getDate()).padStart(2, "0");
+  $(date).max =
+    new Date().getFullYear() +
+    "-" +
+    String(new Date().getMonth() + 1).padStart(2, "0") +
+    "-" +
+    String(new Date().getDate()).padStart(2, "0");
+};
+
 export { giveTakeAdd };

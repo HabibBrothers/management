@@ -1,19 +1,23 @@
-import d from "../assets/js/NTechDOM.js";
+import d from "../lib/dom.js";
 import { header } from "./header.js";
 import { footer } from "./footer.js";
-const home = d.createElement("div");
 
-const main = d
-  .createElement("main")
-  .setAttribute({ class: ["main", "home"] });
+const { createElement, $, post } = d;
 
-const weather = d
-  .createElement("div")
-  .setAttribute({ id: "ww2022", class: "weather" });
+const home = createElement("div");
 
-const weatherImg = d.createElement(
+const main = createElement("main").setAttribute({
+  class: ["main", "home"],
+});
+
+const weather = createElement("div").setAttribute({
+  id: "ww2022",
+  class: "weather",
+});
+
+const weatherImg = createElement(
   "div",
-  d.createElement("img").setAttribute({
+  createElement("img").setAttribute({
     alt: "weather",
     src: "./assets/img/rainy-day.png",
   }),
@@ -21,18 +25,18 @@ const weatherImg = d.createElement(
 );
 
 weather.append(weatherImg);
-const services = d
-  .createElement("div")
-  .setAttribute({ class: ["services"] });
+const services = createElement("div").setAttribute({
+  class: ["services"],
+});
 
-const labour = d.createElement("div").setAttribute({
+const labour = createElement("div").setAttribute({
   class: "item",
   onclick: "window.location='#/labour'",
 });
 labour.append(
-  d.createElement(
+  createElement(
     "div",
-    d.createElement(
+    createElement(
       "svg",
       `<g>
     <path d="M509.596,488.469l-7.384-84.982c-2.974-34.234-26.982-62.976-59.74-71.519l-99.565-25.964
@@ -126,17 +130,17 @@ labour.append(
       class: "icon",
     }
   ),
-  d.createElement("div", "লেভার", { class: "title" })
+  createElement("div", "লেভার", { class: "title" })
 );
 
-const truck = d.createElement("div").setAttribute({
+const truck = createElement("div").setAttribute({
   class: "item",
   onclick: "window.location='#/truck'",
 });
 truck.append(
-  d.createElement(
+  createElement(
     "div",
-    d.createElement(
+    createElement(
       "svg",
       `<g>
       <path fill="#FFFFFF" d="M427.73,633.05c1.01-0.43,2.08-0.61,3.2-0.55c334.69,0.04,669.39,0.02,1004.09,0.01
@@ -260,14 +264,14 @@ truck.append(
   d.createElement("div", "গাড়ি", { class: "title" })
 );
 
-const ship = d.createElement("div").setAttribute({
+const ship = createElement("div").setAttribute({
   class: "item",
   onclick: "window.location='#/ship'",
 });
 ship.append(
-  d.createElement(
+  createElement(
     "div",
-    d.createElement(
+    createElement(
       "svg",
       `<g>
     <rect x="135.995" y="152.159" width="16.001" height="15.674"/>
@@ -308,14 +312,14 @@ ship.append(
   d.createElement("div", "জাহাজ", { class: "title" })
 );
 
-const giveTake = d.createElement("div").setAttribute({
+const giveTake = createElement("div").setAttribute({
   class: "item",
   onclick: "window.location='#/giveTake'",
 });
 giveTake.append(
-  d.createElement(
+  createElement(
     "div",
-    d.createElement(
+    createElement(
       "svg",
       `<g transform="translate(128 128) scale(0.72 0.72)">
       <g transform="translate(-175.05 -175.05000000000004) scale(3.89 3.89)" >
@@ -339,10 +343,8 @@ giveTake.append(
 
 services.append(labour, truck, ship, giveTake);
 home.onload = () => {
-  header.onload();
-  footer.onload();
   header.page = "home";
-  d.post("https://srv2.weatherwidget.org/data/", {
+  post("https://srv2.weatherwidget.org/data/", {
     v: 1.2,
     a: '{"t":"horizontal","lang":"bn","ids":["wl10573"],"cl_bkg":"#FFFFFF","cl_font":"#000000","cl_cloud":"#d4d4d4","cl_persp":"#2196F3","cl_sun":"#FFC107","cl_moon":"#FFC107","cl_thund":"#FF5722","sl_sot":"celcius","sl_ics":"one_a","font":"Arial"}',
     u: "https://2ua.org/bgd/chandpur_sadar_upazila/map/|||Chandpur Sadar Upazila map, Bangladesh",
@@ -354,6 +356,9 @@ home.onload = () => {
       a: { html, jsCode },
     } = JSON.parse(res);
     document.querySelector("#ww2022").innerHTML = html;
+    let script = document.createElement("script");
+    script.innerHTML = jsCode;
+    document.querySelector("#ww2022").appendChild(script);
   });
 };
 main.append(weather, services);

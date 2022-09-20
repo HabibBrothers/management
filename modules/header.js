@@ -1,7 +1,11 @@
-import d from "../assets/js/NTechDOM.js";
-const header = d.createElement("header").setAttribute({ class: "header" });
+import d from "../lib/dom.js";
 
-const logo = d.createElement(
+const { createElement, $ } = d;
+const header = createElement("header").setAttribute({
+  class: "header",
+});
+
+const logo = createElement(
   "div",
   d.createElement(
     "svg",
@@ -20,7 +24,11 @@ const logo = d.createElement(
         <path class="st1" d="M855.61,561.22l5.32,7.69c2.68,3.88,8,4.85,11.88,2.16l45-31.14c3.88-2.68,4.85-8,2.16-11.88l-5.32-7.69    c-2.68-3.88-8-4.85-11.88-2.16l-45,31.14C853.9,552.03,852.93,557.34,855.61,561.22z"/>
     </g>
     `,
-    { class: "logo", viewBox: "0 500 1000 300" }
+    {
+      class: "logo",
+      viewBox: "0 500 1000 300",
+      onclick: "window.location ='#/home'",
+    }
   ),
   { class: "logoDiv" }
 );
@@ -51,4 +59,29 @@ header.append(
 </g></svg>`
 );
 
-export { header };
+// https://stackoverflow.com/questions/118241/calculate-text-width-with-javascript/4032497#4032497
+const measureText = (pText, pFontSize, pStyle) => {
+  let lDiv = document.createElement("div");
+  document.body.appendChild(lDiv);
+  if (pStyle != null) {
+    lDiv.style = pStyle;
+  }
+  lDiv.style.fontSize = "" + pFontSize + "px";
+  lDiv.style.position = "absolute";
+  lDiv.style.left = -1000;
+  lDiv.style.top = -1000;
+
+  lDiv.textContent = pText;
+
+  var lResult = {
+    width: lDiv.clientWidth,
+    height: lDiv.clientHeight,
+  };
+
+  document.body.removeChild(lDiv);
+  lDiv = null;
+
+  return lResult;
+};
+
+export { header, measureText };

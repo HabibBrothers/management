@@ -1,4 +1,4 @@
-import d from "../assets/js/NTechDOM.js";
+import d from "../lib/dom.js";
 
 const loading = d
   .createElement("div")

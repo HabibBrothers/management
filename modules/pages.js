@@ -14,6 +14,7 @@ const pages = {
     giveTake2: "giveTake",
     giveTakeAdd: "giveTakeAdd",
     giveTakeAdd2: "giveTakeAdd2",
+    giveTakeDetails: "giveTakeDetails",
   },
   page: {},
   root: "login",

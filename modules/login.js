@@ -1,9 +1,19 @@
-import d from "../assets/js/NTechDOM.js";
+import d from "../lib/dom.js";
+import $Password from "../lib/custom-password.js";
+import {
+  auth,
+  firebaseConfig,
+  signInWithEmailAndPassword,
+} from "../assets/js/firebase.js";
 import { home } from "./home.js";
-import { inputList } from "./input.js";
 import { pages } from "./pages.js";
-const login = d.createElement("div").setAttribute({ class: "login" });
-const logo = d.createElement(
+
+const { createElement, $ } = d;
+const { customPasword } = $Password;
+
+const login = createElement("div").setAttribute({ class: "login" });
+
+const logo = createElement(
   "svg",
 
   `<g xmlns="http://www.w3.org/2000/svg">
@@ -55,25 +65,26 @@ const logo = d.createElement(
 </g>`,
   { class: "logo", viewBox: "0 0 1000 822.79" }
 );
-const form = d
-  .createElement("form")
-  .setAttribute({ class: "form", name: "form" });
-const email = d.createElement("input").setAttribute({
+
+const form = createElement("form").setAttribute({
+  class: "form",
+  name: "form",
+});
+
+const email = createElement("input").setAttribute({
   required: "",
   autocomplete: "off",
   type: "email",
   spellcheck: "false",
   autofocus: "",
   placeholder: "Please enter email address",
-  onchange: "nin0(this, '1')",
 });
-
-const password = d.createElement("input").setAttribute({
+const password = createElement("input").setAttribute({
   required: "",
   autocomplete: "off",
-  type: "password",
+  type: "text",
+  spellcheck: "false",
   placeholder: "Please enter password",
-  onchange: "nin0(this, '2')",
 });
 
 const FormInput = {
@@ -83,93 +94,85 @@ const FormInput = {
 
 for (let x in FormInput) {
   form.append(
-    d.createElement("label", FormInput[x], {
+    createElement("label", FormInput[x], {
       class: "formLabel",
     }),
     eval(x)
   );
 }
 
-// const span = d.createElement("div", "Forget Password?", {
-//   style: [
-//     "color: #870000; margin-top: 10px; text-align: center;cursor: pointer",
-//   ],
-// });
-
-const submit = d.createElement("button", "Login", {
+const submit = createElement("button", "Login", {
   class: "submitBtn",
   type: "submit",
 });
 
-const error = d.createElement("div", "", { class: "error" });
-const errDiv = d.createElement("div", "", {
+const error = createElement("div", "", { class: "error" });
+const errDiv = createElement("div", "", {
   style: "width: 100%; text-align: left;",
 });
-const closeBtn = `
-<svg onclick="closeDiv('.error')" aria-hidden="true" style="fill: rgb(207, 34, 46); cursor: pointer" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-x">
+const closeBtn = createElement(
+  "svg",
+  `
     <path fill-rule="evenodd" d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z"></path>
-</svg>
-`;
+  `,
+  {
+    "aria-hidden": "true",
+    style: "fill: rgb(207, 34, 46); cursor: pointer",
+    height: "16",
+    viewBox: "0 0 16 16",
+    version: "1.1",
+    width: "16",
+    "data-view-component": "true",
+    class: "octicon octicon-x",
+  }
+);
+closeBtn.onload = () => {
+  $(closeBtn).onclick = () => {
+    $(error).style.display = "none";
+  };
+};
 error.append(errDiv, closeBtn);
 
 form.append(submit, error);
 login.append(logo, form);
 
-const loginRequest = () => {
-  submit
-    .setChildren("Processing...")
-    .changeAttribute("disabled", "")
-    .changeAttribute("style", [
-      "background: #870000c9; color: #fcfcfcb0;",
-    ]);
-  error.changeAttribute("style", "display: none;");
-  d.post(
-    "https://script.google.com/macros/s/AKfycbymExR-OQWZdIEkT6AeLqj9mY92JzS_ucnntS2L/exec",
-    {
-      type: 1,
-      data: JSON.stringify({
-        email: email.getAttribute("value")[0],
-        password: password.getAttribute("value")[0],
-      }),
-    }
-  ).then((res) => {
-    res = JSON.parse(JSON.parse(res).messege);
-    const { result, messege, data } = res;
-    if (result) {
-      if (messege === "email") {
-        errDiv.setChildren("Email doesn't found!");
-        error.changeAttribute("style", "display: flex");
-        submit
-          .setChildren("Login")
-          .removeAttribute("disabled", "style");
-      } else if (messege === "password") {
-        errDiv.setChildren("Password isn't correct!");
-        error.changeAttribute("style", "display: flex");
-        submit
-          .setChildren("Login")
-          .removeAttribute("disabled", "style");
-      } else if (messege === "success") {
-        home._loginData = data;
-        window.localStorage["com.infc.agency.habib-brother's.login"] =
-          data;
+form.onload = () => {
+  const { $password } = customPasword($(password));
+  $(form).onsubmit = (e) => {
+    e.preventDefault();
+    submit
+      .setChildren("Processing...")
+      .changeAttribute("disabled", "")
+      .changeAttribute("style", [
+        "background: #870000c9; color: #fcfcfcb0;",
+      ]);
+    error.changeAttribute("style", "display: none;");
+    signInWithEmailAndPassword(auth, $(email).value, $password())
+      .then((userCredential) => {
         pages.root = "home";
         pages.page = { ...pages.list };
-        window.location = "#/home";
-      }
-    }
-  });
+        window.location = "./";
+      })
+      .catch((err) => {
+        const errorCode = err.code;
+        console.log("errorCode: ", errorCode);
+        error.changeAttribute("style", "display: flex");
+        submit
+          .setChildren("Login")
+          .removeAttribute("disabled", "style");
+        if (errorCode == "auth/user-not-found") {
+          errDiv.setChildren("Email doesn't found!");
+        } else if (errorCode == "auth/wrong-password") {
+          errDiv.setChildren("Password isn't correct!");
+        } else if (errorCode == "auth/network-request-failed") {
+          errDiv.setChildren("Network error! Please try again.");
+        }
+      });
+  };
 };
 
 login.onload = () => {
-  inputList.input = {
-    1: email,
-    2: password,
-  };
   pages.page.login = "login";
   pages.root = "login";
-  document.forms["form"].onsubmit = (e) => {
-    e.preventDefault();
-    loginRequest();
-  };
 };
 export { login };
