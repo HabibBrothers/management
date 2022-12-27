@@ -1,7 +1,8 @@
-import d from "../assets/js/NTechDOM.js";
-import { header } from "./header.js";
+import d from "../lib/dom.js";
+import { header, measureText } from "./header.js";
 import { footer } from "./footer.js";
-import db from "../assets/js/IDB.js";
+import { loading } from "./loading.js";
+import db from "../lib/idb.js";
 
 const truckAdd = d.createElement("div");
 const main = d.createElement("main").setAttribute({ class: "main" });

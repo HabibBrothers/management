@@ -342,7 +342,7 @@ const buttons = createElement(
   455,242.5 "/>`,
       {
         viewBox: "0 0 455 455",
-        onclick: "window.location='#/giveTakeAdd'",
+        onclick: "window.location='#/truckAdd'",
       }
     ),
   ],
@@ -456,4 +456,4 @@ const getInterval = (date = "") => {
   return result;
 };
 
-export { giveTake };
+export { truck };

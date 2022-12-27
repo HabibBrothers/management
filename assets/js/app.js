@@ -15,8 +15,8 @@ import { home } from "../../modules/home.js";
 // import { labour } from "../../modules/labour.js";
 // import { labourTable } from "../../modules/labourTable.js";
 // import { labourAdd } from "../../modules/labourAdd.js";
-// import { truck } from "../../modules/truck.js";
-// import { truckAdd } from "../../modules/truckAdd.js";
+import { truck } from "../../modules/truck.js";
+import { truckAdd } from "../../modules/truckAdd.js";
 // import { ship } from "../../modules/ship.js";
 // import { shipTable } from "../../modules/shipTable.js";
 // import { shipAdd } from "../../modules/shipAdd.js";
@@ -91,6 +91,11 @@ window.hashchange = async () => {
 };
 window.addEventListener("hashchange", hashchange, false);
 
+let closeId = document.querySelector("#closeId");
+
+closeId.onclick = () => {
+  window.history.go(-(history.length - 2));
+};
 // check if the browser supports serviceWorker at all
 // if ("serviceWorker" in navigator) {
 //   // wait for the page to load

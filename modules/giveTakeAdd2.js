@@ -211,7 +211,7 @@ giveTakeAdd2.onload = async () => {
   const id = header.giveTakeTypeId;
 
   if (!id || !id.id) {
-    window.location = "./#/giveTakeDetails";
+    window.history.go(-1);
     return;
   }
 
